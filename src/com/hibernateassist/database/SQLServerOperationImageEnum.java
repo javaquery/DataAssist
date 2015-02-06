@@ -6,7 +6,7 @@ package com.hibernateassist.database;
 
 /**
  *
- * @author 0Signals
+ * @author vicky.thakor
  */
 public enum SQLServerOperationImageEnum {
 

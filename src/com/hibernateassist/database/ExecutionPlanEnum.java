@@ -1,7 +1,7 @@
 package com.hibernateassist.database;
 
 /**
- * @author javaQuery
+ * @author vicky.thakor
  */
 public enum ExecutionPlanEnum {
 
