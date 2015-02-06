@@ -1,0 +1,1 @@
+sqlplan: Its an XML of Microsoft SQL Server Execution plan
