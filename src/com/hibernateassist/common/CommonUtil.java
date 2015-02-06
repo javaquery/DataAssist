@@ -2,13 +2,16 @@ package com.hibernateassist.common;
 
 import java.util.Date;
 
+/**
+ * @author vicky.thakor
+ */
 public class CommonUtil {
 
     /**
-     * Replace ? with @P0, @P1, etc...
+     * @author vicky.thakor
      * @param query
      * @return {@link String} value or null in case of null query
-     * @author vicky thakor
+     * Replace ? with @P0, @P1, etc...
      */
     public static String replaceQuestionMarkWithP(String query) {
         if (query instanceof String) {
@@ -30,8 +33,9 @@ public class CommonUtil {
     }
 
     /**
-     * To get HTML report header String
+     * @author vicky.thakor
      * @return {@link String}
+     * To get HTML report header String
      */
     public static String getHTMLReportHeader() {
         return "<!DOCTYPE html>\n"
@@ -91,8 +95,9 @@ public class CommonUtil {
 
     
     /**
-     * To get HTML report footer String
+     * @author vicky.thakor
      * @return {@link String}
+     * To get HTML report footer String
      */
     public static String getHTMLReportFooter() {
         return "<div class=\"content-footer\"><a href=\"www.javaquery.com\" target=\"_blank\">www.javaquery.com</a></div>"
