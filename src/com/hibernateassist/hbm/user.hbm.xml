@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+  <class name="com.hibernateassist.bean.User" table="user_master">
+    <id name="id" type="int">
+      <column name="id"/>
+      <generator class="assigned"/>
+    </id>
+    <property name="Username" type="java.lang.String">
+      <column name="username"/>
+    </property>
+    <property name="Password" type="java.lang.String">
+      <column name="password"/>
+    </property>
+    <property name="Email" type="java.lang.String">
+      <column name="email"/>
+    </property>
+  </class>
+</hibernate-mapping>
