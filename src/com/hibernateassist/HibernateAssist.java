@@ -214,7 +214,7 @@ public class HibernateAssist {
                     objMSSQLAnalyser.setDatabaseURL(getDatabaseURL());
                     objMSSQLAnalyser.setDatabaseUsername(getDatabaseUsername());
                     objMSSQLAnalyser.setDatabasePassword(getDatabasePassword());
-                    /*objMSSQLAnalyser.generateQueryReport(getCriteriaQuery(), getHTMLReportFolder());*/
+                    objMSSQLAnalyser.generateQueryReport(getCriteriaQuery(), getHTMLReportFolder());
                 }
             }
         } catch (Exception e) {
