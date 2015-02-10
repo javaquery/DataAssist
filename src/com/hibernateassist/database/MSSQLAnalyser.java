@@ -518,7 +518,12 @@ public class MSSQLAnalyser extends AbstractDAO{
      * @param mapNodeProperty
      * @return
      */
-    private String getElementImage(String tagName, Map<String, String> mapNodeProperty) {
+    private List<String> getElementImage(String tagName, Map<String, String> mapNodeProperty) {
+    	/**
+    	 * listString.get(0) : Image file name
+    	 * listString.get(1) : HTML content 
+    	 */
+    	List<String> listString = new ArrayList<String>();
         String returnNode = tagName;
         double EstimateOperatorCost = 0.0;
 
@@ -535,70 +540,166 @@ public class MSSQLAnalyser extends AbstractDAO{
 
         if ("Table Scan:Table Scan".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableScan.toString(), SQLServerOperationImageEnum.TableScan.getTitle(), nodeAttribute.toString(), "Table Scan", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.TableScan.toString());
+            listString.set(1, returnNode);
         } else if ("Sort".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.toString(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.Sort.toString());
+            listString.set(1, returnNode);
         } else if ("Sort:Sort".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.toString(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.Sort.toString());
+            listString.set(1, returnNode);
         } else if ("Distinct Sort:Sort".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.toString(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort<br/>(Distinct Sort)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.Sort.toString());
+            listString.set(1, returnNode);
         } else if ("Left Outer Join:Nested Loops".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Left Outer Join)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.NestedLoops.toString());
+            listString.set(1, returnNode);
         } else if ("Right Outer Join:Nested Loops".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Right Outer Join)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.NestedLoops.toString());
+            listString.set(1, returnNode);
         } else if ("Inner Join:Nested Loops".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Inner Join)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.NestedLoops.toString());
+            listString.set(1, returnNode);
         } else if ("Left Anti Semi Join:Nested Loops".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Left Anti Semi Join)", EstimateOperatorCost);
+
+            listString.set(0, SQLServerOperationImageEnum.NestedLoops.toString());
+            listString.set(1, returnNode);
         } else if ("Left Outer Join:Merge Join".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Merge.toString(), SQLServerOperationImageEnum.Merge.getTitle(), nodeAttribute.toString(), "Merge<br/>(Left Outer Join)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.Merge.toString());
+            listString.set(1, returnNode);
         } else if ("Right Outer Join:Merge Join".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Merge.toString(), SQLServerOperationImageEnum.Merge.getTitle(), nodeAttribute.toString(), "Merge<br/>(Right Outer Join)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.Merge.toString());
+            listString.set(1, returnNode);
         } else if ("Left Outer Join:Hash Match".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.HashMatch.toString(), SQLServerOperationImageEnum.HashMatch.getTitle(), nodeAttribute.toString(), "Hash Match<br/>(Left Outer Join)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.HashMatch.toString());
+            listString.set(1, returnNode);
         } else if ("Right Outer Join:Hash Match".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.HashMatch.toString(), SQLServerOperationImageEnum.HashMatch.getTitle(), nodeAttribute.toString(), "Hash Match<br/>(Right Outer Join)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.HashMatch.toString());
+            listString.set(1, returnNode);
         } else if ("Clustered Index Scan:Clustered Index Scan".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ClusteredIndexScan.toString(), SQLServerOperationImageEnum.ClusteredIndexScan.getTitle(), nodeAttribute.toString(), "Clustered Index Scan", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.ClusteredIndexScan.toString());
+            listString.set(1, returnNode);
         } else if ("Clustered Index Seek:Clustered Index Seek".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ClusteredIndexSeek.toString(), SQLServerOperationImageEnum.ClusteredIndexSeek.getTitle(), nodeAttribute.toString(), "Clustered Index Seek", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.ClusteredIndexSeek.toString());
+            listString.set(1, returnNode);
         } else if ("Index Seek:Index Seek".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.IndexSeek.toString(), SQLServerOperationImageEnum.IndexSeek.getTitle(), nodeAttribute.toString(), "Index Seek", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.IndexSeek.toString());
+            listString.set(1, returnNode);
         } else if ("Compute Scalar:Compute Scalar".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ComputeScalar.toString(), SQLServerOperationImageEnum.ComputeScalar.getTitle(), nodeAttribute.toString(), "Compute Scalar", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.ComputeScalar.toString());
+            listString.set(1, returnNode);
         } else if ("Lazy Spool:Table Spool".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableSpool.toString(), SQLServerOperationImageEnum.TableSpool.getTitle(), nodeAttribute.toString(), "Table Spool<br/>(Lazy Spool)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.TableSpool.toString());
+            listString.set(1, returnNode);
         } else if ("Distribute Streams:Parallelism".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.DistributeStreams.toString(), SQLServerOperationImageEnum.DistributeStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Distribute Streams)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.DistributeStreams.toString());
+            listString.set(1, returnNode);
         } else if ("Repartition Streams:Parallelism".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.RepartitionStreams.toString(), SQLServerOperationImageEnum.RepartitionStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Repartition Streams)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.RepartitionStreams.toString());
+            listString.set(1, returnNode);
         } else if ("Gather Streams:Parallelism".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.GatherStreams.toString(), SQLServerOperationImageEnum.GatherStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Gather Streams)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.GatherStreams.toString());
+            listString.set(1, returnNode);
         } else if ("Sequence:Sequence".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sequence.toString(), SQLServerOperationImageEnum.Sequence.getTitle(), nodeAttribute.toString(), "Sequence", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.Sequence.toString());
+            listString.set(1, returnNode);
         } else if ("Table-valued function:Table-valued function".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableValuedFunction.toString(), SQLServerOperationImageEnum.TableValuedFunction.getTitle(), nodeAttribute.toString(), "Table Valued Function", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.TableValuedFunction.toString());
+            listString.set(1, returnNode);
         } else if ("Insert:Table Insert".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableInsert.toString(), SQLServerOperationImageEnum.TableInsert.getTitle(), nodeAttribute.toString(), "Table Insert", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.TableInsert.toString());
+            listString.set(1, returnNode);
         } else if ("Top:Top".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Top.toString(), SQLServerOperationImageEnum.Top.getTitle(), nodeAttribute.toString(), "Top", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.Top.toString());
+            listString.set(1, returnNode);
         } else if ("Filter:Filter".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Filter.toString(), SQLServerOperationImageEnum.Filter.getTitle(), nodeAttribute.toString(), "Filter", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.Filter.toString());
+            listString.set(1, returnNode);
         } else if ("Compute Scalar:Sequence Project".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Segment.toString(), SQLServerOperationImageEnum.Segment.getTitle(), nodeAttribute.toString(), "Segment", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.Segment.toString());
+            listString.set(1, returnNode);
         } else if ("Segment:Segment".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Segment.toString(), SQLServerOperationImageEnum.Segment.getTitle(), nodeAttribute.toString(), "Segment", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.Segment.toString());
+            listString.set(1, returnNode);
         } else if ("RID Lookup:RID Lookup".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.RIDLookup.toString(), SQLServerOperationImageEnum.RIDLookup.getTitle(), nodeAttribute.toString(), "RID Lookup", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.RIDLookup.toString());
+            listString.set(1, returnNode);
         } else if ("Concatenation:Concatenation".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Concatenation.toString(), SQLServerOperationImageEnum.Concatenation.getTitle(), nodeAttribute.toString(), "Concatenation", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.Concatenation.toString());
+            listString.set(1, returnNode);
         } else if ("Delete:Table Delete".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableDelete.toString(), SQLServerOperationImageEnum.TableDelete.getTitle(), nodeAttribute.toString(), "Table Delete", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.TableDelete.toString());
+            listString.set(1, returnNode);
         } else if ("Update:Table Update".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableUpdate.toString(), SQLServerOperationImageEnum.TableUpdate.getTitle(), nodeAttribute.toString(), "Table Update", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.TableUpdate.toString());
+            listString.set(1, returnNode);
         } else if ("Aggregate:Stream Aggregate".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.StreamAggregate.toString(), SQLServerOperationImageEnum.StreamAggregate.getTitle(), nodeAttribute.toString(), "Stream Aggregate<br/>(Aggregate)", EstimateOperatorCost);
+            
+            listString.set(0, SQLServerOperationImageEnum.StreamAggregate.toString());
+            listString.set(1, returnNode);
         }
-        return returnNode;
+        return listString;
     }
     
     /**
