@@ -194,9 +194,7 @@ public class MSSQLAnalyser extends AbstractDAO{
                     stringBuilderHTMLReport.append("<div id=\"nodeDetails\"></div>");
                     stringBuilderHTMLReport.append("</div>");
                     stringBuilderHTMLReport.append("<div id=\"parent-1\" style=\"width:100%;max-height:500px;overflow:scroll;border:1px double;white-space: nowrap;\">");
-                    stringBuilderHTMLReport.append("<div style=\"display: inline-block;\">");
-                    stringBuilderHTMLReport.append(getHTMLNodeImage(SQLServerOperationImageEnum.Top.toString(), "SELECT", "", "Select", 0));
-            		stringBuilderHTMLReport.append("</div>");
+                    stringBuilderHTMLReport.append(getRootNodeImage());
             		stringBuilderHTMLReport.append("</div><script>");
                     recursiveXMLParse(listRootNode, -1, stringBuilderHTMLReport);
                     stringBuilderHTMLReport.append("</script>");
@@ -306,6 +304,23 @@ public class MSSQLAnalyser extends AbstractDAO{
             }
         }
     }
+	
+	/**
+	 * Get root node operation image (i.e: SELECT, UPDATE, DELETE)
+	 * <br/><br/>
+	 * @author vicky.thakor
+	 * @return
+	 */
+	private String getRootNodeImage(){
+		String HTMLContent = "<div style=\"display: inline-block;vertical-align:top\">";
+		if("SELECT".equalsIgnoreCase(getQueryType())){
+			HTMLContent += getHTMLNodeImage(SQLServerOperationImageEnum.Select.toString(), SQLServerOperationImageEnum.Select.getTitle(), "", "Select", 0).replace("\\", "");
+		}else if("UPDATE".equalsIgnoreCase(getQueryType())){
+			HTMLContent += getHTMLNodeImage(SQLServerOperationImageEnum.Update.toString(), SQLServerOperationImageEnum.Update.getTitle(), "", "Update", 0).replace("\\", "");
+		}
+		HTMLContent += "</div>";
+		return HTMLContent;
+	}
 	
 	/**
 	 * Parse all XML node by recursive method call
