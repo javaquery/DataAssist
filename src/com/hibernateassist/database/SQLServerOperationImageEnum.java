@@ -14,7 +14,9 @@ public enum SQLServerOperationImageEnum {
     Concatenation, TableDelete, TableUpdate, StreamAggregate, TableScan,
     Sort, NestedLoops, Merge, HashMatch, ClusteredIndexScan,
     ClusteredIndexSeek, IndexSeek,
-    DistributeStreams, RepartitionStreams, GatherStreams;
+    DistributeStreams, RepartitionStreams, GatherStreams,
+    
+    Select, Update;
 
     @Override
     public String toString() {
@@ -68,6 +70,10 @@ public enum SQLServerOperationImageEnum {
             return "RepartitionStreams.gif";
         } else if (this == GatherStreams) {
             return "GatherStreams.gif";
+        } else if(this == Select){
+        	return "Select.gif";
+        }else if(this == Update){
+        	return "Update.gif";
         }
         return "";
     }
@@ -123,6 +129,10 @@ public enum SQLServerOperationImageEnum {
             return "Repartition Streams";
         } else if (this == GatherStreams) {
             return "Gather Streams";
+        } else if(this == Select){
+        	return "Select";
+        } else if(this == Update){
+        	return "Update";
         }
         return "";
     }
