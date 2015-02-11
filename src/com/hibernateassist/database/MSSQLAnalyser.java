@@ -49,21 +49,15 @@ public class MSSQLAnalyser extends AbstractDAO{
 				if(mssqlQueryDetails.getQueryPlan() != null && !mssqlQueryDetails.getQueryPlan().isEmpty()){
 					
 					setIconFilename = new HashSet<String>();
-					
 					StringBuilder stringBuilder = new StringBuilder("");
 					stringBuilder.append(CommonUtil.getHTMLReportHeader());
 					stringBuilder.append(getExecutionPlanStatistics(mssqlQueryDetails.getExecutionCount(), mssqlQueryDetails.getLastExecutionTime(), mssqlQueryDetails.getLastElapsedTime(), mssqlQueryDetails.getLastLogicalReads(), mssqlQueryDetails.getLastLogicalWrites()));
 					stringBuilder.append(parseXML(getXMLDocument(mssqlQueryDetails.getQueryPlan(), null)));
 					stringBuilder.append(CommonUtil.getHTMLReportFooter());
 					
-					PrintWriter writer = new PrintWriter(System.getProperty("user.home")+File.separatorChar+"HibernateAssistnew.html", "UTF-8");
+					PrintWriter writer = new PrintWriter("C:\\Users\\0Signals\\Desktop\\HTMLReport"+File.separatorChar+"HibernateAssistnew.html", "UTF-8");
                     writer.write(stringBuilder.toString());
                     writer.close();
-                    
-                    for(String str: getSetIconFilename()){
-                    	System.out.println(str);
-                    }
-                    System.out.println("Done");
 				}
 			}
 		}else{
@@ -343,6 +337,16 @@ public class MSSQLAnalyser extends AbstractDAO{
         }
     }
 	
+    /**
+     * Get child node details
+     * <br/><br/>
+     * @author vicky.thakor
+     * @param parentNode
+     * @param childNodes
+     * @param parentNodeID
+     * @param sb
+     * @return
+     */
     private int generateChildDetails(Node parentNode, NodeList childNodes, int parentNodeID, StringBuilder sb) {
     	try {
     		int oldParentID = parentNodeID;
@@ -406,7 +410,7 @@ public class MSSQLAnalyser extends AbstractDAO{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    	return 0;
+    	return parentNodeID;
     }
     
     /**
@@ -495,7 +499,6 @@ public class MSSQLAnalyser extends AbstractDAO{
         }
         return mapNodeProperty;
     }
-    
     
     /**
      * Get column specific operation details.
