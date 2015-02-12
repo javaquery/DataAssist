@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -42,22 +43,55 @@ public class MSSQLAnalyser extends AbstractDAO{
     private String StatementSubTreeCost;
     private Set<String> setIconFilename;
 	
-	public void generateQueryReport(String query, String reportFolder) throws ClassNotFoundException, SQLException, FileNotFoundException, UnsupportedEncodingException{
+	public void generateQueryReport(String query, String reportFolderPath) throws ClassNotFoundException, SQLException, FileNotFoundException, UnsupportedEncodingException{
 		List<MSSQLQueryDetails> listMssqlQueryDetails = getExecutionPlan(query);
 		if(listMssqlQueryDetails != null && !listMssqlQueryDetails.isEmpty()){
 			for (MSSQLQueryDetails mssqlQueryDetails : listMssqlQueryDetails) {
 				if(mssqlQueryDetails.getQueryPlan() != null && !mssqlQueryDetails.getQueryPlan().isEmpty()){
 					
 					setIconFilename = new HashSet<String>();
-					StringBuilder stringBuilder = new StringBuilder("");
-					stringBuilder.append(CommonUtil.getHTMLReportHeader());
-					stringBuilder.append(getExecutionPlanStatistics(mssqlQueryDetails.getExecutionCount(), mssqlQueryDetails.getLastExecutionTime(), mssqlQueryDetails.getLastElapsedTime(), mssqlQueryDetails.getLastLogicalReads(), mssqlQueryDetails.getLastLogicalWrites()));
-					stringBuilder.append(parseXML(getXMLDocument(mssqlQueryDetails.getQueryPlan(), null)));
-					stringBuilder.append(CommonUtil.getHTMLReportFooter());
+					StringBuilder HTMLReport = new StringBuilder("");
+					HTMLReport.append(CommonUtil.getHTMLReportHeader());
+					HTMLReport.append(getExecutionPlanStatistics(mssqlQueryDetails.getExecutionCount(), mssqlQueryDetails.getLastExecutionTime(), mssqlQueryDetails.getLastElapsedTime(), mssqlQueryDetails.getLastLogicalReads(), mssqlQueryDetails.getLastLogicalWrites()));
+					HTMLReport.append(parseXML(getXMLDocument(mssqlQueryDetails.getQueryPlan(), null)));
+					HTMLReport.append(CommonUtil.getHTMLReportFooter());
 					
-					PrintWriter writer = new PrintWriter("C:\\Users\\0Signals\\Desktop\\HTMLReport"+File.separatorChar+"HibernateAssistnew.html", "UTF-8");
-                    writer.write(stringBuilder.toString());
-                    writer.close();
+					File reportFolder = new File(reportFolderPath);
+					if(reportFolder.exists()){
+						File createHTMLReport = new File(reportFolderPath + File.separatorChar + "HibernateAssist_" + getQueryHash() + ".html");
+                        if (createHTMLReport.exists()) {
+                            createHTMLReport.delete();
+                        }
+                        try {
+                            PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "HibernateAssist_" + getQueryHash() + ".html", "UTF-8");
+                            writer.write(HTMLReport.toString());
+                            writer.close();
+                            String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
+                            logger.info(informationMessage);
+                        } catch (FileNotFoundException ex) {
+                        	Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (UnsupportedEncodingException ex) {
+                        	Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+					}else{
+						logger.info("Can't find your custom report folder");
+                        reportFolderPath = System.getProperty("user.home");
+                        File createHTMLReport = new File(reportFolderPath + File.separatorChar + "MSSQL_HibernateAssist_" + getQueryHash() + ".html");
+                        if (createHTMLReport.exists()) {
+                            createHTMLReport.delete();
+                        }
+                        try {
+                            PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "MSSQL_HibernateAssist_" + getQueryHash() + ".html", "UTF-8");
+                            writer.write(HTMLReport.toString());
+                            writer.close();
+                            String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
+                            logger.info(informationMessage);
+                        } catch (FileNotFoundException ex) {
+                            Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (UnsupportedEncodingException ex) {
+                            Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+					}
 				}
 			}
 		}else{
@@ -193,6 +227,14 @@ public class MSSQLAnalyser extends AbstractDAO{
                     recursiveXMLParse(listRootNode, -1, stringBuilderHTMLReport);
                     stringBuilderHTMLReport.append("</script>");
 	            }
+	            
+	            /*if (listMissingIndexNode != null) {
+                    stringBuilderHTMLReport.append("<div>");
+                    stringBuilderHTMLReport.append("<h2>Missing Index Details</h2>");
+                    ScanMissingIndexes(listMissingIndexNode, stringBuilderHTMLReport);
+                    stringBuilderHTMLReport.append("</div>");
+                }*/
+	            
 			}else{
 				logger.info("Not a valid XML document.");
 			}
@@ -733,6 +775,102 @@ public class MSSQLAnalyser extends AbstractDAO{
         stringBuilder.append("</div>");
         stringBuilder.append("<br/>");
         return stringBuilder.toString();
+    }
+    
+    /**
+     * Get MSSQL proposed indices.
+     * <br/><br/>
+     * @author vicky.thakor
+     * @param nodeListMissingIndex
+     * @param stringBuilder
+     */
+    private void ScanMissingIndexes(NodeList nodeListMissingIndex, StringBuilder stringBuilder) {
+        String databaseName = "", schemaName = "", tableName = "", baseColumn = "", includeColumn = "", impact = "";
+
+        if (nodeListMissingIndex != null) {
+            int nodeLength = nodeListMissingIndex.getLength();
+            if (nodeLength > 0) {
+                for (int i = 0; i < nodeLength; i++) {
+                    if (nodeListMissingIndex.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                        Element MissingIndexGroupNode = (Element) nodeListMissingIndex.item(i);
+                        if (MissingIndexGroupNode != null && "MissingIndexGroup".equalsIgnoreCase(MissingIndexGroupNode.getNodeName())) {
+                            if (MissingIndexGroupNode.hasAttribute("Impact")) {
+                                impact = MissingIndexGroupNode.getAttribute("Impact");
+                            }
+
+                            if (MissingIndexGroupNode.hasChildNodes() && "MissingIndex".equals(MissingIndexGroupNode.getChildNodes().item(1).getNodeName())) {
+                                Element MissingIndexNode = (Element) MissingIndexGroupNode.getChildNodes().item(1);
+                                NamedNodeMap namedNodeMap = MissingIndexNode.getAttributes();
+                                if (namedNodeMap != null) {
+                                    if (namedNodeMap.getNamedItem("Database") != null) {
+                                        databaseName = namedNodeMap.getNamedItem("Database").getNodeValue();
+                                    }
+                                    if (namedNodeMap.getNamedItem("Schema") != null) {
+                                        schemaName = namedNodeMap.getNamedItem("Schema").getNodeValue();
+                                    }
+                                    if (namedNodeMap.getNamedItem("Table") != null) {
+                                        tableName = namedNodeMap.getNamedItem("Table").getNodeValue();
+                                    }
+
+                                    NodeList nodeListChild = MissingIndexNode.getElementsByTagName("ColumnGroup");
+                                    for (int j = 0; j < nodeListChild.getLength(); j++) {
+                                        Element elementColumnGroup = (Element) nodeListChild.item(j);
+
+                                        if (elementColumnGroup.hasAttribute("Usage") && "EQUALITY".equals(elementColumnGroup.getAttribute("Usage"))) {
+                                            NodeList nodeListColumn = elementColumnGroup.getElementsByTagName("Column");
+                                            for (int k = 0; k < nodeListColumn.getLength(); k++) {
+                                                if (k != 0) {
+                                                    baseColumn += ",";
+                                                }
+                                                baseColumn += ((Element) nodeListColumn.item(k)).getAttribute("Name");
+                                            }
+                                        } else if (elementColumnGroup.hasAttribute("Usage") && "INCLUDE".equals(elementColumnGroup.getAttribute("Usage"))) {
+                                            NodeList nodeListColumn = elementColumnGroup.getElementsByTagName("Column");
+                                            for (int k = 0; k < nodeListColumn.getLength(); k++) {
+                                                if (k != 0) {
+                                                    includeColumn += ",";
+                                                }
+                                                includeColumn += ((Element) nodeListColumn.item(k)).getAttribute("Name");
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (databaseName != null && !databaseName.isEmpty()
+                            && schemaName != null && !schemaName.isEmpty()
+                            && tableName != null && !tableName.isEmpty()
+                            && baseColumn != null && !baseColumn.isEmpty()) {
+                        stringBuilder.append("Missing Index Script");
+                        if (impact != null && !impact.isEmpty()) {
+                            stringBuilder.append(" (Impact : ").append(impact).append(")");
+                        }
+                        stringBuilder.append(":");
+                        stringBuilder.append("CREATE NONCLUSTERED INDEX IndxNc_").append(tableName.replace("[", "").replace("]", ""));
+                        String[] baseColumns = baseColumn.split(",");
+                        if (baseColumns.length > 1) {
+                            stringBuilder.append("_MultiCol").append(i);
+                        } else {
+                            baseColumn = baseColumn.replace("[", "");
+                            baseColumn = baseColumn.replace("]", "");
+                            stringBuilder.append("_");
+                            stringBuilder.append(baseColumn);
+                        }
+                        stringBuilder.append(" ON ").append(databaseName).append(".").append(schemaName).append(".").append(tableName);
+                        stringBuilder.append(" (").append(baseColumn).append(")");
+
+                        if (includeColumn != null && !includeColumn.isEmpty()) {
+                            stringBuilder.append(" INCLUDE (").append(includeColumn).append(")");
+                        }
+                        stringBuilder.append(";");
+                    }
+
+                }
+            }
+        }
     }
     
 	public static void main(String[] args) {
