@@ -124,9 +124,9 @@ public class CommonUtil {
     	jsPlumb.append("endpoint: [\"Dot\", {radius: 1}],");
     	jsPlumb.append("endpointStyle: {fillStyle: \"white\"},");
     	jsPlumb.append("setDragAllowedWhenFull: true,");
-    	jsPlumb.append("paintStyle: {strokeStyle: \"gray\",lineWidth: 3},");
+    	jsPlumb.append("paintStyle: {strokeStyle: \"#5b9ada\",lineWidth: 3},");
     	jsPlumb.append("connector: [\"Straight\"],");
-    	jsPlumb.append("connectorStyle: {lineWidth: 3,strokeStyle: \"gray\"},");
+    	jsPlumb.append("connectorStyle: {lineWidth: 3,strokeStyle: \"#5b9ada\"},");
     	jsPlumb.append("overlays: [[\"Arrow\", {width: 10,length: 10,foldback: 1,location: 1,id: \"arrow\"}]]");
     	jsPlumb.append("});");
     	jsPlumb.append("});");
