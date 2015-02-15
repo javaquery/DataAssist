@@ -44,6 +44,7 @@ public class CommonUtil {
                 + "<title>Hibernate Assist report by javaQuery</title>\n"
                 + "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n"
                 + "<script src=\"jquery-1.8.2.min.js\"></script>\n"
+                + "<script src=\"jquery.jsPlumb-1.3.3-all.js\"></script>\n"
                 + "<script>"
                 + "$(\".nodeImage\").live(\"click\",function(){\n"
                 + "$(this).each(function() {\n"
@@ -69,7 +70,7 @@ public class CommonUtil {
                 + "</script>\n"
                 + "<style>\n"
                 + ".content-footer{text-align: center}\n"
-                + ".nodeTable{display: inline-block;vertical-align: top;text-align:center;font-size:12px}"
+                + ".nodeTable{height: 75px !important;display: inline-block;vertical-align: top;text-align:center;font-size:12px}"
                 + ".smooth_blue_background{background-color: #50b7dc !important;border-bottom: 1px solid #2693ba;-webkit-box-shadow: rgba(0,0,0,0.3) 0px 2px 2px -1px;-moz-box-shadow: rgba(0,0,0,0.3) 0px 2px 2px -1px;box-shadow: rgba(0,0,0,0.3) 0px 2px 2px -1px;}"
                 + ".menuBarLocation{z-index: 1000;position: fixed;top:0px;width: 100%;height: 40px}"
                 + "body{margin:0;padding:0;width: 100%;height: 100%;overflow-x: hidden}"
@@ -105,6 +106,33 @@ public class CommonUtil {
                 + "</html>";
     }
 	
+    /**
+     * Use jsPlumb to connect two nodes with an Arrow.
+     * <br/><br/>
+     * @author 0Signals
+     * @param SourceNode
+     * @param TargetNode
+     * @return
+     */
+    public static String getjsPlumbScript(String SourceNode, String TargetNode){
+    	StringBuilder jsPlumb = new StringBuilder("");
+    	jsPlumb.append("jsPlumb.bind(\"ready\", function() {");
+    	jsPlumb.append("jsPlumb.connect({");
+    	jsPlumb.append("source: \""+SourceNode+"\",");
+    	jsPlumb.append("target: \""+TargetNode+"\",");
+    	jsPlumb.append("anchors: [\"LeftMiddle\",\"RightMiddle\"],");
+    	jsPlumb.append("endpoint: [\"Dot\", {radius: 1}],");
+    	jsPlumb.append("endpointStyle: {fillStyle: \"white\"},");
+    	jsPlumb.append("setDragAllowedWhenFull: true,");
+    	jsPlumb.append("paintStyle: {strokeStyle: \"gray\",lineWidth: 3},");
+    	jsPlumb.append("connector: [\"Straight\"],");
+    	jsPlumb.append("connectorStyle: {lineWidth: 3,strokeStyle: \"gray\"},");
+    	jsPlumb.append("overlays: [[\"Arrow\", {width: 10,length: 10,foldback: 1,location: 1,id: \"arrow\"}]]");
+    	jsPlumb.append("});");
+    	jsPlumb.append("});");
+    	return jsPlumb.toString();
+    }
+    
 	/**
 	 * @param args
 	 */
