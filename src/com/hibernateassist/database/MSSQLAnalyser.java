@@ -350,9 +350,9 @@ public class MSSQLAnalyser extends AbstractDAO{
 	private String getRootNodeImage(){
 		String HTMLContent = "<div style=\"display: inline-block;vertical-align:top\">";
 		if("SELECT".equalsIgnoreCase(getQueryType())){
-			HTMLContent += getHTMLNodeImage(SQLServerOperationImageEnum.Select.toString(), SQLServerOperationImageEnum.Select.getTitle(), "", "Select", 0).replace("\\", "");
+			HTMLContent += getHTMLNodeImage(SQLServerOperationImageEnum.Select.toString(), SQLServerOperationImageEnum.Select.getTitle(), "", "Select", 0, -2).replace("\\", "");
 		}else if("UPDATE".equalsIgnoreCase(getQueryType())){
-			HTMLContent += getHTMLNodeImage(SQLServerOperationImageEnum.Update.toString(), SQLServerOperationImageEnum.Update.getTitle(), "", "Update", 0).replace("\\", "");
+			HTMLContent += getHTMLNodeImage(SQLServerOperationImageEnum.Update.toString(), SQLServerOperationImageEnum.Update.getTitle(), "", "Update", 0, -2).replace("\\", "");
 		}
 		HTMLContent += "</div>";
 		return HTMLContent;
@@ -440,15 +440,21 @@ public class MSSQLAnalyser extends AbstractDAO{
                                 if (!operationType.isEmpty()) {
                                     sb.append("$(\"#parent").append(oldParentID).append("\")");
                                     sb.append(".append(\"<div id=\\\"parent").append(childNodeID).append("\\\"");
-                                    sb.append(" style=\\\"padding-left:20px;padding-bottom:20px;display: inline-block;\\\">");
-                                    sb.append(getElementImage(operationType, mapNodeProperty));
+                                    sb.append(" style=\\\"padding-left:72px;padding-bottom:20px;display: inline-block;\\\">");
+                                    sb.append(getElementImage(operationType, mapNodeProperty, childNodeID));
                                     sb.append("</div><br/>\");\n");
+                                    
+                                    /* Set Source and Target node for jsPlumb */
+                                    String sourceNode = "parentTable"+childNodeID;
+                                    String targetNode = oldParentID == -1 ? "rootnode" : "parentTable"+oldParentID; 
+                                    sb.append(CommonUtil.getjsPlumbScript(sourceNode, targetNode));
                                 }
                             }
                         }
                     }
                 }
             }
+            
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -592,7 +598,7 @@ public class MSSQLAnalyser extends AbstractDAO{
      * @param mapNodeProperty
      * @return
      */
-    private String getElementImage(String tagName, Map<String, String> mapNodeProperty) {
+    private String getElementImage(String tagName, Map<String, String> mapNodeProperty, int parentID) {
         String returnNode = tagName;
         double EstimateOperatorCost = 0.0;
 
@@ -608,100 +614,100 @@ public class MSSQLAnalyser extends AbstractDAO{
         }
 
         if ("Table Scan:Table Scan".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableScan.toString(), SQLServerOperationImageEnum.TableScan.getTitle(), nodeAttribute.toString(), "Table Scan", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableScan.toString(), SQLServerOperationImageEnum.TableScan.getTitle(), nodeAttribute.toString(), "Table Scan", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.TableScan.toString());
         } else if ("Sort".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.toString(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.toString(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.Sort.toString());
         } else if ("Sort:Sort".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.toString(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.toString(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.Sort.toString());
         } else if ("Distinct Sort:Sort".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.toString(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort<br/>(Distinct Sort)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.toString(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort<br/>(Distinct Sort)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.Sort.toString());
         } else if ("Left Outer Join:Nested Loops".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Left Outer Join)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Left Outer Join)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.NestedLoops.toString());
         } else if ("Right Outer Join:Nested Loops".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Right Outer Join)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Right Outer Join)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.NestedLoops.toString());
         } else if ("Inner Join:Nested Loops".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Inner Join)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Inner Join)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.NestedLoops.toString());
         } else if ("Left Anti Semi Join:Nested Loops".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Left Anti Semi Join)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.toString(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Left Anti Semi Join)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.NestedLoops.toString());
         } else if ("Left Outer Join:Merge Join".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Merge.toString(), SQLServerOperationImageEnum.Merge.getTitle(), nodeAttribute.toString(), "Merge<br/>(Left Outer Join)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Merge.toString(), SQLServerOperationImageEnum.Merge.getTitle(), nodeAttribute.toString(), "Merge<br/>(Left Outer Join)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.Merge.toString());
         } else if ("Right Outer Join:Merge Join".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Merge.toString(), SQLServerOperationImageEnum.Merge.getTitle(), nodeAttribute.toString(), "Merge<br/>(Right Outer Join)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Merge.toString(), SQLServerOperationImageEnum.Merge.getTitle(), nodeAttribute.toString(), "Merge<br/>(Right Outer Join)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.Merge.toString());
         } else if ("Left Outer Join:Hash Match".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.HashMatch.toString(), SQLServerOperationImageEnum.HashMatch.getTitle(), nodeAttribute.toString(), "Hash Match<br/>(Left Outer Join)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.HashMatch.toString(), SQLServerOperationImageEnum.HashMatch.getTitle(), nodeAttribute.toString(), "Hash Match<br/>(Left Outer Join)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.HashMatch.toString());
         } else if ("Right Outer Join:Hash Match".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.HashMatch.toString(), SQLServerOperationImageEnum.HashMatch.getTitle(), nodeAttribute.toString(), "Hash Match<br/>(Right Outer Join)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.HashMatch.toString(), SQLServerOperationImageEnum.HashMatch.getTitle(), nodeAttribute.toString(), "Hash Match<br/>(Right Outer Join)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.HashMatch.toString());
         } else if ("Clustered Index Scan:Clustered Index Scan".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ClusteredIndexScan.toString(), SQLServerOperationImageEnum.ClusteredIndexScan.getTitle(), nodeAttribute.toString(), "Clustered Index Scan", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ClusteredIndexScan.toString(), SQLServerOperationImageEnum.ClusteredIndexScan.getTitle(), nodeAttribute.toString(), "Clustered Index Scan", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.ClusteredIndexScan.toString());
         } else if ("Clustered Index Seek:Clustered Index Seek".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ClusteredIndexSeek.toString(), SQLServerOperationImageEnum.ClusteredIndexSeek.getTitle(), nodeAttribute.toString(), "Clustered Index Seek", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ClusteredIndexSeek.toString(), SQLServerOperationImageEnum.ClusteredIndexSeek.getTitle(), nodeAttribute.toString(), "Clustered Index Seek", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.ClusteredIndexSeek.toString());
         } else if ("Index Seek:Index Seek".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.IndexSeek.toString(), SQLServerOperationImageEnum.IndexSeek.getTitle(), nodeAttribute.toString(), "Index Seek", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.IndexSeek.toString(), SQLServerOperationImageEnum.IndexSeek.getTitle(), nodeAttribute.toString(), "Index Seek", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.IndexSeek.toString());
         } else if ("Compute Scalar:Compute Scalar".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ComputeScalar.toString(), SQLServerOperationImageEnum.ComputeScalar.getTitle(), nodeAttribute.toString(), "Compute Scalar", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ComputeScalar.toString(), SQLServerOperationImageEnum.ComputeScalar.getTitle(), nodeAttribute.toString(), "Compute Scalar", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.ComputeScalar.toString());
         } else if ("Lazy Spool:Table Spool".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableSpool.toString(), SQLServerOperationImageEnum.TableSpool.getTitle(), nodeAttribute.toString(), "Table Spool<br/>(Lazy Spool)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableSpool.toString(), SQLServerOperationImageEnum.TableSpool.getTitle(), nodeAttribute.toString(), "Table Spool<br/>(Lazy Spool)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.TableSpool.toString());
         } else if ("Distribute Streams:Parallelism".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.DistributeStreams.toString(), SQLServerOperationImageEnum.DistributeStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Distribute Streams)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.DistributeStreams.toString(), SQLServerOperationImageEnum.DistributeStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Distribute Streams)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.DistributeStreams.toString());
         } else if ("Repartition Streams:Parallelism".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.RepartitionStreams.toString(), SQLServerOperationImageEnum.RepartitionStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Repartition Streams)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.RepartitionStreams.toString(), SQLServerOperationImageEnum.RepartitionStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Repartition Streams)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.RepartitionStreams.toString());
         } else if ("Gather Streams:Parallelism".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.GatherStreams.toString(), SQLServerOperationImageEnum.GatherStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Gather Streams)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.GatherStreams.toString(), SQLServerOperationImageEnum.GatherStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Gather Streams)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.GatherStreams.toString());
         } else if ("Sequence:Sequence".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sequence.toString(), SQLServerOperationImageEnum.Sequence.getTitle(), nodeAttribute.toString(), "Sequence", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sequence.toString(), SQLServerOperationImageEnum.Sequence.getTitle(), nodeAttribute.toString(), "Sequence", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.Sequence.toString());
         } else if ("Table-valued function:Table-valued function".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableValuedFunction.toString(), SQLServerOperationImageEnum.TableValuedFunction.getTitle(), nodeAttribute.toString(), "Table Valued Function", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableValuedFunction.toString(), SQLServerOperationImageEnum.TableValuedFunction.getTitle(), nodeAttribute.toString(), "Table Valued Function", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.TableValuedFunction.toString());
         } else if ("Insert:Table Insert".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableInsert.toString(), SQLServerOperationImageEnum.TableInsert.getTitle(), nodeAttribute.toString(), "Table Insert", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableInsert.toString(), SQLServerOperationImageEnum.TableInsert.getTitle(), nodeAttribute.toString(), "Table Insert", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.TableInsert.toString());
         } else if ("Top:Top".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Top.toString(), SQLServerOperationImageEnum.Top.getTitle(), nodeAttribute.toString(), "Top", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Top.toString(), SQLServerOperationImageEnum.Top.getTitle(), nodeAttribute.toString(), "Top", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.Top.toString());
         } else if ("Filter:Filter".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Filter.toString(), SQLServerOperationImageEnum.Filter.getTitle(), nodeAttribute.toString(), "Filter", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Filter.toString(), SQLServerOperationImageEnum.Filter.getTitle(), nodeAttribute.toString(), "Filter", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.Filter.toString());
         } else if ("Compute Scalar:Sequence Project".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Segment.toString(), SQLServerOperationImageEnum.Segment.getTitle(), nodeAttribute.toString(), "Segment", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Segment.toString(), SQLServerOperationImageEnum.Segment.getTitle(), nodeAttribute.toString(), "Segment", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.Segment.toString());
         } else if ("Segment:Segment".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Segment.toString(), SQLServerOperationImageEnum.Segment.getTitle(), nodeAttribute.toString(), "Segment", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Segment.toString(), SQLServerOperationImageEnum.Segment.getTitle(), nodeAttribute.toString(), "Segment", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.Segment.toString());
         } else if ("RID Lookup:RID Lookup".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.RIDLookup.toString(), SQLServerOperationImageEnum.RIDLookup.getTitle(), nodeAttribute.toString(), "RID Lookup", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.RIDLookup.toString(), SQLServerOperationImageEnum.RIDLookup.getTitle(), nodeAttribute.toString(), "RID Lookup", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.RIDLookup.toString());
         } else if ("Concatenation:Concatenation".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Concatenation.toString(), SQLServerOperationImageEnum.Concatenation.getTitle(), nodeAttribute.toString(), "Concatenation", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Concatenation.toString(), SQLServerOperationImageEnum.Concatenation.getTitle(), nodeAttribute.toString(), "Concatenation", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.Concatenation.toString());
         } else if ("Delete:Table Delete".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableDelete.toString(), SQLServerOperationImageEnum.TableDelete.getTitle(), nodeAttribute.toString(), "Table Delete", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableDelete.toString(), SQLServerOperationImageEnum.TableDelete.getTitle(), nodeAttribute.toString(), "Table Delete", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.TableDelete.toString());
         } else if ("Update:Table Update".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableUpdate.toString(), SQLServerOperationImageEnum.TableUpdate.getTitle(), nodeAttribute.toString(), "Table Update", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableUpdate.toString(), SQLServerOperationImageEnum.TableUpdate.getTitle(), nodeAttribute.toString(), "Table Update", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.TableUpdate.toString());
         } else if ("Aggregate:Stream Aggregate".equalsIgnoreCase(tagName)) {
-            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.StreamAggregate.toString(), SQLServerOperationImageEnum.StreamAggregate.getTitle(), nodeAttribute.toString(), "Stream Aggregate<br/>(Aggregate)", EstimateOperatorCost);
+            returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.StreamAggregate.toString(), SQLServerOperationImageEnum.StreamAggregate.getTitle(), nodeAttribute.toString(), "Stream Aggregate<br/>(Aggregate)", EstimateOperatorCost, parentID);
             getSetIconFilename().add(SQLServerOperationImageEnum.StreamAggregate.toString());
         }
         return returnNode;
@@ -718,8 +724,10 @@ public class MSSQLAnalyser extends AbstractDAO{
      * @param EstimateOperatorCost
      * @return {@link String}
      */
-    private String getHTMLNodeImage(String imageSrc, String imageTitle, String imageAttribute, String nodeName, double EstimateOperatorCost) {
-        return "<table class=\\\"nodeTable\\\">"
+    private String getHTMLNodeImage(String imageSrc, String imageTitle, String imageAttribute, String nodeName, double EstimateOperatorCost, int parentID) {
+    	String nodeID = parentID == -2 ? "rootnode" : "parentTable"+parentID;
+    	
+        return "<table class=\\\"nodeTable\\\" id=\\\""+nodeID+"\\\">"
                 + "<tr>"
                 + "<td>"
                 + "<img class=\\\"nodeImage\\\" src=\\\"" + imageSrc + "\\\" title=\\\"" + imageTitle + "\\\" " + imageAttribute + "/>"
