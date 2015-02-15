@@ -136,4 +136,63 @@ public enum SQLServerOperationImageEnum {
         }
         return "";
     }
+    
+    public String getImagePosition(){
+    	if (this == ComputeScalar) {
+            return "-104px -8px";
+        } else if (this == TableSpool) {
+            return "-56px -56px";
+        } else if (this == Sequence) {
+            return "-728px -8px";
+        } else if (this == TableValuedFunction) {
+            return "-152px -56px";
+        } else if (this == TableInsert) {
+            return "-968px -8px";
+        } else if (this == Top) {
+            return "-200px -56px";
+        } else if (this == Filter) {
+            return "-248px -8px";
+        } else if (this == SequenceProject) {
+            return "-776px -8px";
+        } else if (this == Segment) {
+            return "-632px -8px";
+        } else if (this == RIDLookup) {
+            return "-584px -8px";
+        } else if (this == Concatenation) {
+            return "-152px -8px";
+        } else if (this == TableDelete) {
+            return "-920px -8px";
+        } else if (this == TableUpdate) {
+            return "-104px -56px";
+        } else if (this == StreamAggregate) {
+            return "-872px -8px";
+        } else if (this == TableScan) {
+            return "-8px -56px";
+        } else if (this == Sort) {
+            return "-824px -8px";
+        } else if (this == NestedLoops) {
+            return "-488px -8px";
+        } else if (this == Merge) {
+            return "-440px -8px";
+        } else if (this == HashMatch) {
+            return "-344px -8px";
+        } else if (this == ClusteredIndexScan) {
+            return "-8px -8px";
+        } else if (this == ClusteredIndexSeek) {
+            return "-56px -8px";
+        } else if (this == IndexSeek) {
+            return "-392px -8px";
+        } else if (this == DistributeStreams) {
+            return "-200px -8px";
+        } else if (this == RepartitionStreams) {
+            return "-536px -8px";
+        } else if (this == GatherStreams) {
+            return "-296px -8px";
+        } else if(this == Select){
+        	return "-680px -8px";
+        }else if(this == Update){
+        	return "-248px -56px";
+        }
+    	return "";
+    }
 }
