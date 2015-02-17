@@ -728,12 +728,12 @@ public class MSSQLAnalyser extends AbstractDAO{
     	
         return "<table class=\\\"nodeTable\\\" id=\\\""+nodeID+"\\\">"
                 + "<tr>"
-                + "<td>"
+                + "<td style=\\\"width:95px\\\">"
                 + "<div class=\\\"nodeImage\\\" style=\\\"margin:0px auto;width:32px;height:32px;background: url('combine_icon_hibernate_assist.png') no-repeat "+imageSrc+"\\\" title=\\\"" + imageTitle + "\\\" " + imageAttribute + "></div>"
                 + "</td>"
                 + "</tr>"
                 + "<tr>"
-                + "<td >" + nodeName + "<br/>Cost:" + EstimateOperatorCost + " %"
+                + "<td style=\\\"width:95px\\\">" + nodeName + "<br/>Cost:" + EstimateOperatorCost + " %"
                 + "</td>"
                 + "</tr>"
                 + "</table>";
