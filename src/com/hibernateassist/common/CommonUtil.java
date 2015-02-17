@@ -74,7 +74,7 @@ public class CommonUtil {
                 + "</script>\n"
                 + "<style>\n"
                 + ".content-footer{text-align: center}\n"
-                + ".nodeTable{height: 75px !important;display: inline-block;vertical-align: top;text-align:center;font-size:12px}"
+                + ".nodeTable{width:95px !important;height: 95px !important;display: inline-block;vertical-align: top;text-align:center;font-size:12px;overflow:hidden;margin:0px auto}"
                 + ".smooth_blue_background{background-color: #50b7dc !important;border-bottom: 1px solid #2693ba;-webkit-box-shadow: rgba(0,0,0,0.3) 0px 2px 2px -1px;-moz-box-shadow: rgba(0,0,0,0.3) 0px 2px 2px -1px;box-shadow: rgba(0,0,0,0.3) 0px 2px 2px -1px;}"
                 + ".menuBarLocation{z-index: 1000;position: fixed;top:0px;width: 100%;height: 40px}"
                 + "body{margin:0;padding:0;width: 100%;height: 100%;overflow-x: hidden}"
