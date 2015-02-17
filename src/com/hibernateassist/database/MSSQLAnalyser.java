@@ -347,7 +347,7 @@ public class MSSQLAnalyser extends AbstractDAO{
 	 * @return
 	 */
 	private String getRootNodeImage(){
-		String HTMLContent = "<div style=\"display: inline-block;vertical-align:top\">";
+		String HTMLContent = "<div style=\"display: inline-block;vertical-align:top;text-align:center\">";
 		if("SELECT".equalsIgnoreCase(getQueryType())){
 			HTMLContent += getHTMLNodeImage(SQLServerOperationImageEnum.Select.getImagePosition(), SQLServerOperationImageEnum.Select.getTitle(), "", "Select", 0, -2).replace("\\", "");
 		}else if("UPDATE".equalsIgnoreCase(getQueryType())){
@@ -439,7 +439,7 @@ public class MSSQLAnalyser extends AbstractDAO{
                                 if (!operationType.isEmpty()) {
                                     sb.append("$(\"#parent").append(oldParentID).append("\")");
                                     sb.append(".append(\"<div id=\\\"parent").append(childNodeID).append("\\\"");
-                                    sb.append(" style=\\\"padding-left:72px;padding-bottom:20px;display: inline-block;\\\">");
+                                    sb.append(" style=\\\"padding-left:95px;padding-bottom:20px;display: inline-block;\\\">");
                                     sb.append(getElementImage(operationType, mapNodeProperty, childNodeID));
                                     sb.append("</div><br/>\");\n");
                                     
@@ -729,7 +729,7 @@ public class MSSQLAnalyser extends AbstractDAO{
         return "<table class=\\\"nodeTable\\\" id=\\\""+nodeID+"\\\">"
                 + "<tr>"
                 + "<td>"
-                + "<div class=\\\"nodeImage\\\" style=\\\"width:32px;height:32px;background: url('combine_icon_hibernate_assist.png') no-repeat "+imageSrc+"\\\" title=\\\"" + imageTitle + "\\\" " + imageAttribute + "></div>"
+                + "<div class=\\\"nodeImage\\\" style=\\\"margin:0px auto;width:32px;height:32px;background: url('combine_icon_hibernate_assist.png') no-repeat "+imageSrc+"\\\" title=\\\"" + imageTitle + "\\\" " + imageAttribute + "></div>"
                 + "</td>"
                 + "</tr>"
                 + "<tr>"
