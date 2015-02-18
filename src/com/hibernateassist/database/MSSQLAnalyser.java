@@ -219,12 +219,14 @@ public class MSSQLAnalyser extends AbstractDAO{
             		getQueryProperties(listQueryStatement, stringBuilderHTMLReport);
             	 	stringBuilderHTMLReport.append("<div>");
                     stringBuilderHTMLReport.append("<h2>Execution Plan</h2>");
+                    stringBuilderHTMLReport.append("<div style=\"position:relative\">");
+                    stringBuilderHTMLReport.append("<div id=\"nodeDetails\" style=\"display:none;position:absolute;top:0px;right:20px;width:250px;background-color:rgb(255, 255, 161)\"></div>");
                     stringBuilderHTMLReport.append("<div id=\"parent-1\" style=\"width:100%;max-height:500px;overflow:scroll;border:1px double;white-space: nowrap;position:relative\">");
-                    stringBuilderHTMLReport.append("<div id=\"nodeDetails\" style=\"display:none;position:absolute;top:0px;right:0px;width:250px;background-color:rgb(255, 255, 161)\"></div>");
                     stringBuilderHTMLReport.append(getRootNodeImage());
             		stringBuilderHTMLReport.append("</div><script>");
                     recursiveXMLParse(listRootNode, -1, stringBuilderHTMLReport);
                     stringBuilderHTMLReport.append("</script>");
+                    stringBuilderHTMLReport.append("<div>");
 	            }
 	            
 	            /*if (listMissingIndexNode != null) {
@@ -733,7 +735,7 @@ public class MSSQLAnalyser extends AbstractDAO{
                 + "</td>"
                 + "</tr>"
                 + "<tr>"
-                + "<td style=\\\"width:95px\\\">" + nodeName + "<br/>Cost:" + EstimateOperatorCost + " %"
+                + "<td style=\\\"width:95px;white-space: pre-wrap;\\\">" + nodeName + "<br/>Cost:" + EstimateOperatorCost + " %"
                 + "</td>"
                 + "</tr>"
                 + "</table>";
