@@ -105,7 +105,7 @@ public class CommonUtil {
      * To get HTML report footer String
      */
     public static String getHTMLReportFooter() {
-        return "<div class=\"content-footer\"><a href=\"www.javaquery.com\" target=\"_blank\">www.javaquery.com</a></div>"
+        return "<div class=\"content-footer\"><a href=\"http://www.javaquery.com\" target=\"_blank\">www.javaquery.com</a></div>"
                 + "</div></body>"
                 + "</html>";
     }
