@@ -16,7 +16,9 @@ public enum SQLServerOperationImageEnum {
     ClusteredIndexSeek, IndexSeek,
     DistributeStreams, RepartitionStreams, GatherStreams,
     
-    Select, Update;
+    Select, Update,
+    
+    IconNotFound;
 
     @Override
     public String toString() {
@@ -192,6 +194,8 @@ public enum SQLServerOperationImageEnum {
         	return "-680px -8px";
         }else if(this == Update){
         	return "-248px -56px";
+        }else if(this == IconNotFound){
+        	return "-296px -56px";
         }
     	return "";
     }
