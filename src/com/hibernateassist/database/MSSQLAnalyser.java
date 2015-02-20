@@ -48,7 +48,7 @@ public class MSSQLAnalyser extends AbstractDAO{
 		if(listMssqlQueryDetails != null && !listMssqlQueryDetails.isEmpty()){
 			for (MSSQLQueryDetails mssqlQueryDetails : listMssqlQueryDetails) {
 				if(mssqlQueryDetails.getQueryPlan() != null && !mssqlQueryDetails.getQueryPlan().isEmpty()){
-					
+
 					setIconFilename = new HashSet<String>();
 					StringBuilder HTMLReport = new StringBuilder("");
 					HTMLReport.append(CommonUtil.getHTMLReportHeader());
@@ -229,12 +229,14 @@ public class MSSQLAnalyser extends AbstractDAO{
                     stringBuilderHTMLReport.append("<div>");
 	            }
 	            
-	            /*if (listMissingIndexNode != null) {
+	            if (listMissingIndexNode != null) {
                     stringBuilderHTMLReport.append("<div>");
                     stringBuilderHTMLReport.append("<h2>Missing Index Details</h2>");
+                    stringBuilderHTMLReport.append("<div style=\"border: 1px dashed;padding:5px;background-color:skyblue;\">");
                     ScanMissingIndexes(listMissingIndexNode, stringBuilderHTMLReport);
                     stringBuilderHTMLReport.append("</div>");
-                }*/
+                    stringBuilderHTMLReport.append("</div>");
+                }
 	            
 			}else{
 				logger.info("Not a valid XML document.");
@@ -588,6 +590,10 @@ public class MSSQLAnalyser extends AbstractDAO{
                 }
 
             }
+        }else if("Table Scan".equalsIgnoreCase(operationType)){
+        	if(elementRelOp.getElementsByTagName("TableScan") != null){
+        		
+        	}
         }
         return mapOperationProperty;
     }
@@ -807,8 +813,9 @@ public class MSSQLAnalyser extends AbstractDAO{
                                 impact = MissingIndexGroupNode.getAttribute("Impact");
                             }
 
-                            if (MissingIndexGroupNode.hasChildNodes() && "MissingIndex".equals(MissingIndexGroupNode.getChildNodes().item(1).getNodeName())) {
-                                Element MissingIndexNode = (Element) MissingIndexGroupNode.getChildNodes().item(1);
+                            if (MissingIndexGroupNode.hasChildNodes() && 
+                            		"MissingIndex".equals(MissingIndexGroupNode.getChildNodes().item(0).getNodeName())) {
+                                Element MissingIndexNode = (Element) MissingIndexGroupNode.getChildNodes().item(0);
                                 NamedNodeMap namedNodeMap = MissingIndexNode.getAttributes();
                                 if (namedNodeMap != null) {
                                     if (namedNodeMap.getNamedItem("Database") != null) {
@@ -853,15 +860,15 @@ public class MSSQLAnalyser extends AbstractDAO{
                             && schemaName != null && !schemaName.isEmpty()
                             && tableName != null && !tableName.isEmpty()
                             && baseColumn != null && !baseColumn.isEmpty()) {
-                        stringBuilder.append("Missing Index Script");
+                        stringBuilder.append("<b>Missing Index Script");
                         if (impact != null && !impact.isEmpty()) {
                             stringBuilder.append(" (Impact : ").append(impact).append(")");
                         }
-                        stringBuilder.append(":");
+                        stringBuilder.append(":</b>");
                         stringBuilder.append("CREATE NONCLUSTERED INDEX IndxNc_").append(tableName.replace("[", "").replace("]", ""));
                         String[] baseColumns = baseColumn.split(",");
                         if (baseColumns.length > 1) {
-                            stringBuilder.append("_MultiCol").append(i);
+                            stringBuilder.append("_MultiCol").append((i+1));
                         } else {
                             baseColumn = baseColumn.replace("[", "");
                             baseColumn = baseColumn.replace("]", "");
