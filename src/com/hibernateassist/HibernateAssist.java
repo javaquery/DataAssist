@@ -208,13 +208,17 @@ public class HibernateAssist {
                 logger.info("Provide valid criteria");
             } else {
                 String dialect = getDialect();
-                if ("org.hibernate.dialect.SQLServerDialect".equals(dialect)) {
+                if ("org.hibernate.dialect.SQLServerDialect".equalsIgnoreCase(dialect)) {
                     MSSQLAnalyser objMSSQLAnalyser = new MSSQLAnalyser();
                     objMSSQLAnalyser.setDatabaseDriver(getDatabaseDriver());
                     objMSSQLAnalyser.setDatabaseURL(getDatabaseURL());
                     objMSSQLAnalyser.setDatabaseUsername(getDatabaseUsername());
                     objMSSQLAnalyser.setDatabasePassword(getDatabasePassword());
                     objMSSQLAnalyser.generateQueryReport(getCriteriaQuery(), getHTMLReportFolder());
+                }else if("org.hibernate.dialect.MySQLDialect".equalsIgnoreCase(dialect)
+                		|| "org.hibernate.dialect.MySQLInnoDBDialect".equalsIgnoreCase(dialect)
+                		|| "org.hibernate.dialect.MySQLMyISAMDialect".equalsIgnoreCase(dialect)){
+                	System.out.println(getCriteriaQuery());
                 }
             }
         } catch (Exception e) {
