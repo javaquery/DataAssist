@@ -11,11 +11,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,7 +39,6 @@ public class MSSQLAnalyser extends AbstractDAO{
 	private String QueryType;
 	private String QueryHash;
     private String StatementSubTreeCost;
-    private Set<String> setIconFilename;
 	
 	public void generateQueryReport(String query, String reportFolderPath) throws ClassNotFoundException, SQLException, FileNotFoundException, UnsupportedEncodingException{
 		List<MSSQLQueryDetails> listMssqlQueryDetails = getExecutionPlan(query);
@@ -49,54 +46,36 @@ public class MSSQLAnalyser extends AbstractDAO{
 			for (MSSQLQueryDetails mssqlQueryDetails : listMssqlQueryDetails) {
 				if(mssqlQueryDetails.getQueryPlan() != null && !mssqlQueryDetails.getQueryPlan().isEmpty()){
 
-					setIconFilename = new HashSet<String>();
 					StringBuilder HTMLReport = new StringBuilder("");
 					HTMLReport.append(CommonUtil.getHTMLReportHeader());
 					HTMLReport.append(getExecutionPlanStatistics(mssqlQueryDetails.getExecutionCount(), mssqlQueryDetails.getLastExecutionTime(), mssqlQueryDetails.getLastElapsedTime(), mssqlQueryDetails.getLastLogicalReads(), mssqlQueryDetails.getLastLogicalWrites()));
 					HTMLReport.append(parseXML(getXMLDocument(mssqlQueryDetails.getQueryPlan(), null)));
 					HTMLReport.append(CommonUtil.getHTMLReportFooter());
 					
-					File reportFolder = new File(reportFolderPath);
-					if(reportFolder.exists()){
-						File createHTMLReport = new File(reportFolderPath + File.separatorChar + "HibernateAssist_" + getQueryHash() + ".html");
-                        if (createHTMLReport.exists()) {
-                            createHTMLReport.delete();
-                        }
-                        try {
-                            PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "HibernateAssist_" + getQueryHash() + ".html", "UTF-8");
-                            writer.write(HTMLReport.toString());
-                            writer.close();
-                            String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
-                            logger.info(informationMessage);
-                        } catch (FileNotFoundException ex) {
-                        	Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (UnsupportedEncodingException ex) {
-                        	Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-					}else{
-						logger.info("Can't find your custom report folder");
-                        reportFolderPath = System.getProperty("user.home");
-                        File createHTMLReport = new File(reportFolderPath + File.separatorChar + "MSSQL_HibernateAssist_" + getQueryHash() + ".html");
-                        if (createHTMLReport.exists()) {
-                            createHTMLReport.delete();
-                        }
-                        try {
-                            PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "MSSQL_HibernateAssist_" + getQueryHash() + ".html", "UTF-8");
-                            writer.write(HTMLReport.toString());
-                            writer.close();
-                            String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
-                            logger.info(informationMessage);
-                        } catch (FileNotFoundException ex) {
-                            Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (UnsupportedEncodingException ex) {
-                            Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-					}
+					reportFolderPath = reportFolderPath == null ? "" : reportFolderPath;
+					createHTMLReportFile(HTMLReport.toString(), reportFolderPath);
 				}
 			}
 		}else{
 			logger.info("Execution plan not found on database. Please execute same Criteria multiple times to generate execution plan.");
 		}
+	}
+	
+	/**
+	 * Generate HTML Report from Microsoft SQL file.
+	 * <br/><br/>
+	 * @author vicky.thakor
+	 * @param sqlPlanXMLFile
+	 * @param reportFolderPath
+	 */
+	public void generateQueryReportFromFile(String sqlPlanXMLFile, String reportFolderPath){
+		StringBuilder HTMLReport = new StringBuilder("");
+		HTMLReport.append(CommonUtil.getHTMLReportHeader());
+		HTMLReport.append(parseXML(getXMLDocument(null, sqlPlanXMLFile)));
+		HTMLReport.append(CommonUtil.getHTMLReportFooter());
+		
+		reportFolderPath = reportFolderPath == null ? "" : reportFolderPath;
+		createHTMLReportFile(HTMLReport.toString(), reportFolderPath);
 	}
 	
 	/**
@@ -220,7 +199,7 @@ public class MSSQLAnalyser extends AbstractDAO{
             	 	stringBuilderHTMLReport.append("<div>");
                     stringBuilderHTMLReport.append("<h2>Execution Plan</h2>");
                     stringBuilderHTMLReport.append("<div style=\"position:relative\">");
-                    stringBuilderHTMLReport.append("<div id=\"nodeDetails\" style=\"display:none;position:absolute;top:0px;right:20px;width:250px;background-color:rgb(255, 255, 161)\"></div>");
+                    stringBuilderHTMLReport.append("<div id=\"nodeDetails\" style=\"z-index: 1;margin-top: 1px;display:none;position:absolute;top:0px;right:20px;width:250px;background-color:rgb(255, 255, 161)\"></div>");
                     stringBuilderHTMLReport.append("<div id=\"parent-1\" style=\"width:100%;max-height:500px;overflow:scroll;border:1px double;white-space: nowrap;position:relative\">");
                     stringBuilderHTMLReport.append(getRootNodeImage());
             		stringBuilderHTMLReport.append("</div><script>");
@@ -229,7 +208,8 @@ public class MSSQLAnalyser extends AbstractDAO{
                     stringBuilderHTMLReport.append("<div>");
 	            }
 	            
-	            if (listMissingIndexNode != null) {
+	            if (listMissingIndexNode != null && listMissingIndexNode.getLength() > 0) {
+	            	System.out.println("in here");
                     stringBuilderHTMLReport.append("<div>");
                     stringBuilderHTMLReport.append("<h2>Missing Index Details</h2>");
                     stringBuilderHTMLReport.append("<div style=\"border: 1px dashed;padding:5px;background-color:skyblue;\">");
@@ -436,7 +416,7 @@ public class MSSQLAnalyser extends AbstractDAO{
 
                                     Map<String, String> mapOperationProperty = getOperationProperty(physicalOperation, elementChild);
                                     if (mapOperationProperty != null && !mapNodeProperty.isEmpty()) {
-                                        // mapNodeProperty.putAll(mapOperationProperty);
+                                         mapNodeProperty.putAll(mapOperationProperty);
                                     }
                                 }
 
@@ -622,100 +602,72 @@ public class MSSQLAnalyser extends AbstractDAO{
 
         if ("Table Scan:Table Scan".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableScan.getImagePosition(), SQLServerOperationImageEnum.TableScan.getTitle(), nodeAttribute.toString(), "Table Scan", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.TableScan.toString());
         } else if ("Sort".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.getImagePosition(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.Sort.toString());
         } else if ("Sort:Sort".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.getImagePosition(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.Sort.toString());
         } else if ("Distinct Sort:Sort".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sort.getImagePosition(), SQLServerOperationImageEnum.Sort.getTitle(), nodeAttribute.toString(), "Sort<br/>(Distinct Sort)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.Sort.toString());
         } else if ("Left Outer Join:Nested Loops".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.getImagePosition(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Left Outer Join)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.NestedLoops.toString());
         } else if ("Right Outer Join:Nested Loops".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.getImagePosition(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Right Outer Join)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.NestedLoops.toString());
         } else if ("Inner Join:Nested Loops".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.getImagePosition(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Inner Join)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.NestedLoops.toString());
         } else if ("Left Anti Semi Join:Nested Loops".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NestedLoops.getImagePosition(), SQLServerOperationImageEnum.NestedLoops.getTitle(), nodeAttribute.toString(), "Nested Loops<br/>(Left Anti Semi Join)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.NestedLoops.toString());
         } else if ("Left Outer Join:Merge Join".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Merge.getImagePosition(), SQLServerOperationImageEnum.Merge.getTitle(), nodeAttribute.toString(), "Merge<br/>(Left Outer Join)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.Merge.toString());
         } else if ("Right Outer Join:Merge Join".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Merge.getImagePosition(), SQLServerOperationImageEnum.Merge.getTitle(), nodeAttribute.toString(), "Merge<br/>(Right Outer Join)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.Merge.toString());
         } else if ("Left Outer Join:Hash Match".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.HashMatch.getImagePosition(), SQLServerOperationImageEnum.HashMatch.getTitle(), nodeAttribute.toString(), "Hash Match<br/>(Left Outer Join)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.HashMatch.toString());
         } else if ("Right Outer Join:Hash Match".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.HashMatch.getImagePosition(), SQLServerOperationImageEnum.HashMatch.getTitle(), nodeAttribute.toString(), "Hash Match<br/>(Right Outer Join)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.HashMatch.toString());
         } else if ("Clustered Index Scan:Clustered Index Scan".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ClusteredIndexScan.getImagePosition(), SQLServerOperationImageEnum.ClusteredIndexScan.getTitle(), nodeAttribute.toString(), "Clustered Index Scan", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.ClusteredIndexScan.toString());
         } else if ("Clustered Index Seek:Clustered Index Seek".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ClusteredIndexSeek.getImagePosition(), SQLServerOperationImageEnum.ClusteredIndexSeek.getTitle(), nodeAttribute.toString(), "Clustered Index Seek", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.ClusteredIndexSeek.toString());
         } else if ("Index Seek:Index Seek".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.IndexSeek.getImagePosition(), SQLServerOperationImageEnum.IndexSeek.getTitle(), nodeAttribute.toString(), "Index Seek", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.IndexSeek.toString());
         } else if ("Compute Scalar:Compute Scalar".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.ComputeScalar.getImagePosition(), SQLServerOperationImageEnum.ComputeScalar.getTitle(), nodeAttribute.toString(), "Compute Scalar", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.ComputeScalar.toString());
         } else if ("Lazy Spool:Table Spool".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableSpool.getImagePosition(), SQLServerOperationImageEnum.TableSpool.getTitle(), nodeAttribute.toString(), "Table Spool<br/>(Lazy Spool)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.TableSpool.toString());
         } else if ("Distribute Streams:Parallelism".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.DistributeStreams.getImagePosition(), SQLServerOperationImageEnum.DistributeStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Distribute Streams)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.DistributeStreams.toString());
         } else if ("Repartition Streams:Parallelism".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.RepartitionStreams.getImagePosition(), SQLServerOperationImageEnum.RepartitionStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Repartition Streams)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.RepartitionStreams.toString());
         } else if ("Gather Streams:Parallelism".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.GatherStreams.getImagePosition(), SQLServerOperationImageEnum.GatherStreams.getTitle(), nodeAttribute.toString(), "Parallelism<br/>(Gather Streams)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.GatherStreams.toString());
         } else if ("Sequence:Sequence".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Sequence.getImagePosition(), SQLServerOperationImageEnum.Sequence.getTitle(), nodeAttribute.toString(), "Sequence", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.Sequence.toString());
         } else if ("Table-valued function:Table-valued function".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableValuedFunction.getImagePosition(), SQLServerOperationImageEnum.TableValuedFunction.getTitle(), nodeAttribute.toString(), "Table Valued Function", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.TableValuedFunction.toString());
         } else if ("Insert:Table Insert".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableInsert.getImagePosition(), SQLServerOperationImageEnum.TableInsert.getTitle(), nodeAttribute.toString(), "Table Insert", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.TableInsert.toString());
         } else if ("Top:Top".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Top.getImagePosition(), SQLServerOperationImageEnum.Top.getTitle(), nodeAttribute.toString(), "Top", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.Top.toString());
         } else if ("Filter:Filter".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Filter.getImagePosition(), SQLServerOperationImageEnum.Filter.getTitle(), nodeAttribute.toString(), "Filter", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.Filter.toString());
         } else if ("Compute Scalar:Sequence Project".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Segment.getImagePosition(), SQLServerOperationImageEnum.Segment.getTitle(), nodeAttribute.toString(), "Segment", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.Segment.toString());
         } else if ("Segment:Segment".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Segment.getImagePosition(), SQLServerOperationImageEnum.Segment.getTitle(), nodeAttribute.toString(), "Segment", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.Segment.toString());
         } else if ("RID Lookup:RID Lookup".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.RIDLookup.getImagePosition(), SQLServerOperationImageEnum.RIDLookup.getTitle(), nodeAttribute.toString(), "RID Lookup", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.RIDLookup.toString());
         } else if ("Concatenation:Concatenation".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.Concatenation.getImagePosition(), SQLServerOperationImageEnum.Concatenation.getTitle(), nodeAttribute.toString(), "Concatenation", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.Concatenation.toString());
         } else if ("Delete:Table Delete".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableDelete.getImagePosition(), SQLServerOperationImageEnum.TableDelete.getTitle(), nodeAttribute.toString(), "Table Delete", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.TableDelete.toString());
         } else if ("Update:Table Update".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.TableUpdate.getImagePosition(), SQLServerOperationImageEnum.TableUpdate.getTitle(), nodeAttribute.toString(), "Table Update", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.TableUpdate.toString());
         } else if ("Aggregate:Stream Aggregate".equalsIgnoreCase(tagName)) {
             returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.StreamAggregate.getImagePosition(), SQLServerOperationImageEnum.StreamAggregate.getTitle(), nodeAttribute.toString(), "Stream Aggregate<br/>(Aggregate)", EstimateOperatorCost, parentID);
-            getSetIconFilename().add(SQLServerOperationImageEnum.StreamAggregate.toString());
+        }else if("Inner Join:Hash Match".equalsIgnoreCase(tagName)){
+        	returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.HashMatch.getImagePosition(), SQLServerOperationImageEnum.HashMatch.getTitle(), nodeAttribute.toString(), "Hash Match<br/>(Inner Join)", EstimateOperatorCost, parentID);
+        }else{
+        	returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.IconNotFound.getImagePosition(), tagName, nodeAttribute.toString(), tagName, EstimateOperatorCost, parentID);
         }
         return returnNode;
     }
@@ -812,46 +764,53 @@ public class MSSQLAnalyser extends AbstractDAO{
                             if (MissingIndexGroupNode.hasAttribute("Impact")) {
                                 impact = MissingIndexGroupNode.getAttribute("Impact");
                             }
+                            
+                            if (MissingIndexGroupNode.hasChildNodes()) {
+                            	Element MissingIndexNode = null;
+                            	for(int j = 0; j < MissingIndexGroupNode.getChildNodes().getLength(); j++){
+                            		if(MissingIndexGroupNode.getChildNodes().item(j).getNodeType() == Node.ELEMENT_NODE){
+                            			MissingIndexNode = (Element) MissingIndexGroupNode.getChildNodes().item(j); 
+                            		}
+                            	}
+                            	
+                            	if(MissingIndexNode != null && "MissingIndex".equalsIgnoreCase(MissingIndexNode.getNodeName())){
+                                     NamedNodeMap namedNodeMap = MissingIndexNode.getAttributes();
+                                     if (namedNodeMap != null) {
+                                         if (namedNodeMap.getNamedItem("Database") != null) {
+                                             databaseName = namedNodeMap.getNamedItem("Database").getNodeValue();
+                                         }
+                                         if (namedNodeMap.getNamedItem("Schema") != null) {
+                                             schemaName = namedNodeMap.getNamedItem("Schema").getNodeValue();
+                                         }
+                                         if (namedNodeMap.getNamedItem("Table") != null) {
+                                             tableName = namedNodeMap.getNamedItem("Table").getNodeValue();
+                                         }
 
-                            if (MissingIndexGroupNode.hasChildNodes() && 
-                            		"MissingIndex".equals(MissingIndexGroupNode.getChildNodes().item(0).getNodeName())) {
-                                Element MissingIndexNode = (Element) MissingIndexGroupNode.getChildNodes().item(0);
-                                NamedNodeMap namedNodeMap = MissingIndexNode.getAttributes();
-                                if (namedNodeMap != null) {
-                                    if (namedNodeMap.getNamedItem("Database") != null) {
-                                        databaseName = namedNodeMap.getNamedItem("Database").getNodeValue();
-                                    }
-                                    if (namedNodeMap.getNamedItem("Schema") != null) {
-                                        schemaName = namedNodeMap.getNamedItem("Schema").getNodeValue();
-                                    }
-                                    if (namedNodeMap.getNamedItem("Table") != null) {
-                                        tableName = namedNodeMap.getNamedItem("Table").getNodeValue();
-                                    }
+                                         NodeList nodeListChild = MissingIndexNode.getElementsByTagName("ColumnGroup");
+                                         for (int j = 0; j < nodeListChild.getLength(); j++) {
+                                             Element elementColumnGroup = (Element) nodeListChild.item(j);
 
-                                    NodeList nodeListChild = MissingIndexNode.getElementsByTagName("ColumnGroup");
-                                    for (int j = 0; j < nodeListChild.getLength(); j++) {
-                                        Element elementColumnGroup = (Element) nodeListChild.item(j);
+                                             if (elementColumnGroup.hasAttribute("Usage") && "EQUALITY".equals(elementColumnGroup.getAttribute("Usage"))) {
+                                                 NodeList nodeListColumn = elementColumnGroup.getElementsByTagName("Column");
+                                                 for (int k = 0; k < nodeListColumn.getLength(); k++) {
+                                                     if (k != 0) {
+                                                         baseColumn += ",";
+                                                     }
+                                                     baseColumn += ((Element) nodeListColumn.item(k)).getAttribute("Name");
+                                                 }
+                                             } else if (elementColumnGroup.hasAttribute("Usage") && "INCLUDE".equals(elementColumnGroup.getAttribute("Usage"))) {
+                                                 NodeList nodeListColumn = elementColumnGroup.getElementsByTagName("Column");
+                                                 for (int k = 0; k < nodeListColumn.getLength(); k++) {
+                                                     if (k != 0) {
+                                                         includeColumn += ",";
+                                                     }
+                                                     includeColumn += ((Element) nodeListColumn.item(k)).getAttribute("Name");
+                                                 }
+                                             }
 
-                                        if (elementColumnGroup.hasAttribute("Usage") && "EQUALITY".equals(elementColumnGroup.getAttribute("Usage"))) {
-                                            NodeList nodeListColumn = elementColumnGroup.getElementsByTagName("Column");
-                                            for (int k = 0; k < nodeListColumn.getLength(); k++) {
-                                                if (k != 0) {
-                                                    baseColumn += ",";
-                                                }
-                                                baseColumn += ((Element) nodeListColumn.item(k)).getAttribute("Name");
-                                            }
-                                        } else if (elementColumnGroup.hasAttribute("Usage") && "INCLUDE".equals(elementColumnGroup.getAttribute("Usage"))) {
-                                            NodeList nodeListColumn = elementColumnGroup.getElementsByTagName("Column");
-                                            for (int k = 0; k < nodeListColumn.getLength(); k++) {
-                                                if (k != 0) {
-                                                    includeColumn += ",";
-                                                }
-                                                includeColumn += ((Element) nodeListColumn.item(k)).getAttribute("Name");
-                                            }
-                                        }
-
-                                    }
-                                }
+                                         }
+                                     }
+                            	}
                             }
                         }
                     }
@@ -889,6 +848,51 @@ public class MSSQLAnalyser extends AbstractDAO{
         }
     }
     
+    /**
+     * Create HTML file.
+     * <br/><br/>
+     * @author vicky.thakor
+     * @param HTMLContent
+     */
+    private void createHTMLReportFile(String HTMLContent, String reportFolderPath){
+    	File reportFolder = new File(reportFolderPath);
+		if(reportFolder.exists()){
+			File createHTMLReport = new File(reportFolderPath + File.separatorChar + "HibernateAssist_" + getQueryHash() + ".html");
+            if (createHTMLReport.exists()) {
+                createHTMLReport.delete();
+            }
+            try {
+                PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "HibernateAssist_" + getQueryHash() + ".html", "UTF-8");
+                writer.write(HTMLContent.toString());
+                writer.close();
+                String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
+                logger.info(informationMessage);
+            } catch (FileNotFoundException ex) {
+            	Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (UnsupportedEncodingException ex) {
+            	Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+            }
+		}else{
+			logger.info("Can't find your custom report folder");
+            reportFolderPath = System.getProperty("user.home");
+            File createHTMLReport = new File(reportFolderPath + File.separatorChar + "MSSQL_HibernateAssist_" + getQueryHash() + ".html");
+            if (createHTMLReport.exists()) {
+                createHTMLReport.delete();
+            }
+            try {
+                PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "MSSQL_HibernateAssist_" + getQueryHash() + ".html", "UTF-8");
+                writer.write(HTMLContent.toString());
+                writer.close();
+                String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
+                logger.info(informationMessage);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+            }
+		}
+    }
+    
 	public static void main(String[] args) {
 		
 	}
@@ -915,13 +919,5 @@ public class MSSQLAnalyser extends AbstractDAO{
 
 	public void setStatementSubTreeCost(String statementSubTreeCost) {
 		StatementSubTreeCost = statementSubTreeCost;
-	}
-
-	public Set<String> getSetIconFilename() {
-		return setIconFilename;
-	}
-
-	public void setSetIconFilename(Set<String> setIconFilename) {
-		this.setIconFilename = setIconFilename;
 	}
 }
