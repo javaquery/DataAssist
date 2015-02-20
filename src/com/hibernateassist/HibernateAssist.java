@@ -1,9 +1,16 @@
 package com.hibernateassist;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -32,7 +39,12 @@ public class HibernateAssist {
     private Criteria criteria;
     private static final Logger logger = Logger.getLogger(HibernateAssist.class.getName());
     private String HTMLReportFolder;
+    private String MSSQLExecutionPlanFile;
 
+    public HibernateAssist(){
+    	
+    }
+    
     public HibernateAssist(Session HibernateSession) {
         this.HibernateLocalSession = HibernateSession;
     }
@@ -227,6 +239,46 @@ public class HibernateAssist {
     }
 
     /**
+     * Create HTML Report from Microsoft SQLPlan.
+     * <br/><br/>
+     * @author vicky.thakor
+     * @throws IOException 
+     */
+    public void analyseMSSQLPlan() throws IOException{
+    	if(getMSSQLExecutionPlanFile() == null || getMSSQLExecutionPlanFile().isEmpty()){
+    		logger.info("Provide Microsoft SQLPlan file path.");
+    	}else if(!getMSSQLExecutionPlanFile().endsWith(".sqlplan")){
+    		logger.info("Provide valid Microsoft SQLPlan file (extension: .sqlplan).");
+    	}else{
+    		/* Create temporary XML file. */
+	        File temporaryXMLFile = File.createTempFile("HibernateAssistTemporaryFile", ".xml");
+    		BufferedReader objBufferedReader = new BufferedReader(new FileReader(getMSSQLExecutionPlanFile()));
+    	    try {
+    	        StringBuilder stringBuffer = new StringBuilder();
+    	        String readLine = objBufferedReader.readLine();
+    	        while (readLine != null) {
+    	        	if(readLine.contains("utf-16")){
+    	        		readLine = readLine.replace("utf-16", "utf-8");
+    	        	}
+    	            stringBuffer.append(readLine);
+    	            readLine = objBufferedReader.readLine();
+    	        }
+    	        String fileContent = stringBuffer.toString();
+    	        
+	        	/* Write .sqlplan content to temporary .xml file. */
+    	        BufferedWriter objBufferedWriter = new BufferedWriter(new FileWriter(temporaryXMLFile));
+    	        objBufferedWriter.write(fileContent);
+    	        objBufferedWriter.close();
+    	    } finally {
+    	        objBufferedReader.close();
+    	    }
+    		
+    		MSSQLAnalyser objMSSQLAnalyser = new MSSQLAnalyser();
+    		objMSSQLAnalyser.generateQueryReportFromFile(temporaryXMLFile.getAbsolutePath(), getHTMLReportFolder());
+    	}
+    }
+    
+    /**
      * Get criteria
      * @return {@link Criteria}
      */
@@ -257,4 +309,20 @@ public class HibernateAssist {
     public void setHTMLReportFolder(String HTMLReportFolder) {
         this.HTMLReportFolder = HTMLReportFolder;
     }
+
+    /**
+     * Get .sqlplan file path
+     * @return
+     */
+	public String getMSSQLExecutionPlanFile() {
+		return MSSQLExecutionPlanFile;
+	}
+
+	/**
+	 * Set .sqlplan file path
+	 * @param mSSQLExecutionPlanFile
+	 */
+	public void setMSSQLExecutionPlanFile(String mSSQLExecutionPlanFile) {
+		MSSQLExecutionPlanFile = mSSQLExecutionPlanFile;
+	}
 }
