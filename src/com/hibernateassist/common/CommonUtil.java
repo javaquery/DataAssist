@@ -48,7 +48,7 @@ public class CommonUtil {
                 + "<script>"
                 + "$(\".nodeImage\").live(\"click\",function(){\n"
                 + "$(this).each(function() {\n"
-                + " var htmlContent = \"<tr><td style=\\\"text-align:right\\\"><a style=\\\"color:blue;text-decoration: underline;cursor: pointer;\\\" id=\\\"closenodedetails\\\">close</a></td></tr>\";\n"
+                + " var htmlContent = \"<tr><td><a style=\\\"color:blue;text-decoration: underline;cursor: pointer;\\\" id=\\\"closenodedetails\\\">close</a></td></tr>\";\n"
                 + " var count = 0;\n"
                 + "$.each(this.attributes, function() {\n"
                 + "  if(this.specified) {\n"
@@ -73,8 +73,9 @@ public class CommonUtil {
                 + "});"
                 + "</script>\n"
                 + "<style>\n"
+                + "#nodeDetails{width: 250px;max-height:400px;overflow:scroll;z-index: 1;margin-top: 1px;display:none;position:absolute;top:0px;right:20px;background-color:rgb(255, 255, 161)}\n"
                 + ".content-footer{text-align: center}\n"
-                + ".nodeTable{width:95px !important;height: 95px !important;display: inline-block;vertical-align: top;text-align:center;font-size:12px;overflow:hidden;margin:0px auto}"
+                + ".nodeTable{width:95px !important;height: 95px !important;display: inline-block;vertical-align: top;text-align:center;font-size:12px;margin:0px auto}"
                 + ".smooth_blue_background{background-color: #50b7dc !important;border-bottom: 1px solid #2693ba;-webkit-box-shadow: rgba(0,0,0,0.3) 0px 2px 2px -1px;-moz-box-shadow: rgba(0,0,0,0.3) 0px 2px 2px -1px;box-shadow: rgba(0,0,0,0.3) 0px 2px 2px -1px;}"
                 + ".menuBarLocation{z-index: 1000;position: fixed;top:0px;width: 100%;height: 40px}"
                 + "body{margin:0;padding:0;width: 100%;height: 100%;overflow-x: hidden}"
@@ -105,7 +106,26 @@ public class CommonUtil {
      * To get HTML report footer String
      */
     public static String getHTMLReportFooter() {
-        return "<div class=\"content-footer\"><a href=\"http://www.javaquery.com\" target=\"_blank\">www.javaquery.com</a></div>"
+        return "<div class=\"content-footer\">"
+        		+ "<div style=\"text-align:left\">"
+        		+ "<hr/>"
+        		+ "<b>Hibernate Assist</b>, an Open source Database analysis Tool for Object Relational Tool(Hibernate)."
+        		+ "<ul>"
+        		+ "<li>Third party tools rights reserved by their respective authors.</li>"
+        		+ "<li>Files required to view this HTML report <b>1.)</b> combine_icon_hibernate_assist.png <b>2.)</b> jquery-1.8.2.min.js <b>3.)</b> jquery.jsPlumb-1.3.3-all.js</li>"
+        		+ "<li>Icon Not Found: Icon represents that this particular operation not handled in HibernateAssist. Please report it on <a href=\"mailto:vicky.thakor@javaquery.com\" target=\"_blank\" style=\"color:blue\">vicky.thakor@javaquery.com</a> with Operation displayed under icon and also if you've information about icon please find the details from <a href=\"http://technet.microsoft.com/en-us/library/ms175913(v=sql.105).aspx\" target=\"_blank\">http://technet.microsoft.com/en-us/library/ms175913(v=sql.105).aspx</a>.</li>"
+        		+ "</ul>"
+        		+ "Github: <a style=\"color:blue\" href=\"http://github.com/javaquery/HibernateAssist\" target=\"_blank\">http://github.com/javaquery/HibernateAssist</a>"
+        		+ "<br/>"
+        		+ "Author: <a style=\"color:blue\" href=\"http://www.javaquery.com\" target=\"_blank\">http://www.javaquery.com</a>"
+        		+ "<br/>"
+        		+ "Twitter: <a style=\"color:blue\" href=\"https://www.twitter.com/javaquery\" target=\"_blank\">@javaquery</a>"
+        		+ "<br/>"
+        		+ "Facebook: <a style=\"color:blue\" href=\"https://www.facebook.com/thejavaquery\" target=\"_blank\">thejavaquery</a>"
+        		+ "<br/>"
+        		+ "Google+: <a style=\"color:blue\" href=\"https://plus.google.com/+Javaquery\" target=\"_blank\">+Javaquery</a>"
+        		+ "</div>"
+    			+ "<a href=\"http://www.javaquery.com\" target=\"_blank\">www.javaquery.com</a></div>"
                 + "</div></body>"
                 + "</html>";
     }
@@ -126,7 +146,7 @@ public class CommonUtil {
     	jsPlumb.append("target: \""+TargetNode+"\",");
     	jsPlumb.append("anchors: [\"LeftMiddle\",\"RightMiddle\"],");
     	jsPlumb.append("endpoint: [\"Dot\", {radius: 1}],");
-    	jsPlumb.append("endpointStyle: {fillStyle: \"white\"},");
+    	jsPlumb.append("endpointStyle: {fillStyle: \"#5b9ada\"},");
     	jsPlumb.append("setDragAllowedWhenFull: true,");
     	jsPlumb.append("paintStyle: {strokeStyle: \"#5b9ada\",lineWidth: 3},");
     	jsPlumb.append("connector: [\"Straight\"],");

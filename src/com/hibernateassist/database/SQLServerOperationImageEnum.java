@@ -13,12 +13,12 @@ public enum SQLServerOperationImageEnum {
     Top, Filter, SequenceProject, Segment, RIDLookup,
     Concatenation, TableDelete, TableUpdate, StreamAggregate, TableScan,
     Sort, NestedLoops, Merge, HashMatch, ClusteredIndexScan,
-    ClusteredIndexSeek, IndexSeek,
+    ClusteredIndexSeek, IndexSeek, KeyLookup,
     DistributeStreams, RepartitionStreams, GatherStreams,
     
-    Select, Update,
+    Select, Update, Delete, TSQLIcon,
     
-    IconNotFound;
+    WarningIcon, ParallelIcon, IconNotFound;
 
     @Override
     public String toString() {
@@ -76,6 +76,10 @@ public enum SQLServerOperationImageEnum {
         	return "Select.gif";
         }else if(this == Update){
         	return "Update.gif";
+        }else if(this == WarningIcon){
+        	return "Warning";
+        }else if(this == ParallelIcon){
+        	return "Parallel";
         }
         return "";
     }
@@ -135,6 +139,14 @@ public enum SQLServerOperationImageEnum {
         	return "Select";
         } else if(this == Update){
         	return "Update";
+        }else if(this == KeyLookup){
+        	return "Key Lookup";
+        }else if(this == Delete){
+        	return "Delete";
+        }else if(this == WarningIcon){
+        	return "Warning";
+        }else if(this == ParallelIcon){
+        	return "Parallel";
         }
         return "";
     }
@@ -196,6 +208,14 @@ public enum SQLServerOperationImageEnum {
         	return "-248px -56px";
         }else if(this == IconNotFound){
         	return "-296px -56px";
+        }else if(this == KeyLookup){
+        	return "-344px -56px";
+        }else if(this == TSQLIcon){
+        	return "-248px -56px";
+        }else if(this == WarningIcon){
+        	return "-392px -56px";
+        }else if(this == ParallelIcon){
+        	return "-424px -56px";
         }
     	return "";
     }

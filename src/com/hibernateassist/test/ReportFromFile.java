@@ -12,7 +12,7 @@ public class ReportFromFile {
 	 */
 	public static void main(String[] args) throws IOException {
 		 HibernateAssist objHibernateAssist = new HibernateAssist();
-	        objHibernateAssist.setMSSQLExecutionPlanFile("C:\\Users\\0Signals\\Desktop\\HTMLReport\\ComplexPlan.sqlplan");
+	        objHibernateAssist.setMSSQLExecutionPlanFile("C:\\Users\\0Signals\\Desktop\\HTMLReport\\SQL Plans\\meeting modified.sqlplan");
 	        objHibernateAssist.setHTMLReportFolder("C:\\Users\\0Signals\\Desktop\\HTMLReport");
 	        objHibernateAssist.analyseMSSQLPlan();
 

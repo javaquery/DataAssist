@@ -10,7 +10,6 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -32,6 +31,15 @@ import com.hibernateassist.database.MSSQLAnalyser;
 
 
 /**
+ * Hibernate Assist
+ * 
+ * Title: HibernateAssist v1.1
+ *
+ * Copyright (c) 2010 - 2011 Vicky Thakor (vicky.thakor@javaquery.com)
+ * 
+ * http://www.javaquery.com
+ * http://github.com/javaquery/HibernateAssist
+ * 
  * @author vicky.thakor
  */
 public class HibernateAssist {
@@ -226,11 +234,12 @@ public class HibernateAssist {
                     objMSSQLAnalyser.setDatabaseURL(getDatabaseURL());
                     objMSSQLAnalyser.setDatabaseUsername(getDatabaseUsername());
                     objMSSQLAnalyser.setDatabasePassword(getDatabasePassword());
+                    logger.info("Hibernate Assist: If report is not generating please execute same Criteria 2-3 times.");
                     objMSSQLAnalyser.generateQueryReport(getCriteriaQuery(), getHTMLReportFolder());
                 }else if("org.hibernate.dialect.MySQLDialect".equalsIgnoreCase(dialect)
                 		|| "org.hibernate.dialect.MySQLInnoDBDialect".equalsIgnoreCase(dialect)
                 		|| "org.hibernate.dialect.MySQLMyISAMDialect".equalsIgnoreCase(dialect)){
-                	System.out.println(getCriteriaQuery());
+                	System.out.println("Under Construction");
                 }
             }
         } catch (Exception e) {
@@ -254,16 +263,16 @@ public class HibernateAssist {
 	        File temporaryXMLFile = File.createTempFile("HibernateAssistTemporaryFile", ".xml");
     		BufferedReader objBufferedReader = new BufferedReader(new FileReader(getMSSQLExecutionPlanFile()));
     	    try {
-    	        StringBuilder stringBuffer = new StringBuilder();
+    	        StringBuilder objStringBuilder = new StringBuilder();
     	        String readLine = objBufferedReader.readLine();
     	        while (readLine != null) {
     	        	if(readLine.contains("utf-16")){
     	        		readLine = readLine.replace("utf-16", "utf-8");
     	        	}
-    	            stringBuffer.append(readLine);
+    	            objStringBuilder.append(readLine);
     	            readLine = objBufferedReader.readLine();
     	        }
-    	        String fileContent = stringBuffer.toString();
+    	        String fileContent = objStringBuilder.toString();
     	        
 	        	/* Write .sqlplan content to temporary .xml file. */
     	        BufferedWriter objBufferedWriter = new BufferedWriter(new FileWriter(temporaryXMLFile));
