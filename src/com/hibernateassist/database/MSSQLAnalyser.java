@@ -713,7 +713,7 @@ public class MSSQLAnalyser extends AbstractDAO{
         		
         		if(elementHash.hasChildNodes()){
         			Element elementProbeResidual = (Element) elementHash.getElementsByTagName("ProbeResidual").item(0);
-        			if(elementProbeResidual.hasChildNodes()){
+        			if(elementProbeResidual != null && elementProbeResidual.hasChildNodes()){
         				Element elementScalarOperator = (Element) elementProbeResidual.getElementsByTagName("ScalarOperator").item(0);
         				NamedNodeMap namedNodeMap = elementScalarOperator.getAttributes();
         				getAttributeMap(namedNodeMap, mapOperationProperty);
