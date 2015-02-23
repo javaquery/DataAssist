@@ -60,3 +60,4 @@ objHibernateAssist.setMSSQLExecutionPlanFile("C:\\Users\\javaQuery\\Desktop\\HTM
 objHibernateAssist.setHTMLReportFolder("C:\\Users\\javaQuery\\Desktop\\HTMLReport");
 objHibernateAssist.analyseMSSQLPlan();
 </pre>
+
