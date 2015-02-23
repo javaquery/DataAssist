@@ -28,7 +28,7 @@ Hibernate is one of the greatest creation but now developer don't care about que
 	</tr>
 </table>
 
-#Source Code (Criteria Analyses)
+#Source Code (Criteria Analysis)
 <pre>
 Criteria criteria = objSession.createCriteria(User.class);
 criteria.add(Restrictions.eq("Username", "vicky.thakor"));
@@ -53,7 +53,7 @@ HibernateAssist objHibernateAssist = new HibernateAssist(objSession);
 objHibernateAssist.getHibernateProperty("hibernate.show_sql");
 </pre>
 
-#Source Code (Microsoft SQL Server .sqlplan Analyses)
+#Source Code (Microsoft SQL Server .sqlplan Analysis)
 <pre>
 HibernateAssist objHibernateAssist = new HibernateAssist();
 objHibernateAssist.setMSSQLExecutionPlanFile("C:\\Users\\javaQuery\\Desktop\\HTMLReport\\SQL Plans\\ComplexQuery.sqlplan");
