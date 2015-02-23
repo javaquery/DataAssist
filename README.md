@@ -28,7 +28,7 @@ Hibernate is one of the greatest creation but now developer don't care about que
 	</tr>
 </table>
 
-#Live Sample Report
+#Online Sample Report
 <a href="http://javaquery.github.io/HibernateAssist/" target="_blank">http://javaquery.github.io/HibernateAssist/</a>
 
 #Source Code (Criteria Analysis)
