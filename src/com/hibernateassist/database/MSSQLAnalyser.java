@@ -712,11 +712,25 @@ public class MSSQLAnalyser extends AbstractDAO{
         		Element elementHash = (Element) elementRelOp.getElementsByTagName("Hash").item(0);
         		
         		if(elementHash.hasChildNodes()){
-        			Element elementProbeResidual = (Element) elementHash.getElementsByTagName("ProbeResidual").item(0);
-        			if(elementProbeResidual != null && elementProbeResidual.hasChildNodes()){
-        				Element elementScalarOperator = (Element) elementProbeResidual.getElementsByTagName("ScalarOperator").item(0);
-        				NamedNodeMap namedNodeMap = elementScalarOperator.getAttributes();
-        				getAttributeMap(namedNodeMap, mapOperationProperty);
+        			for(int i = 0; i < elementHash.getChildNodes().getLength(); i++){
+        				if(elementHash.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE){
+        					Element elementChildNode = (Element) elementHash.getChildNodes().item(i);
+        					if("ProbeResidual".equalsIgnoreCase(elementChildNode.getNodeName())){
+        						Element elementScalarOperator = (Element) elementChildNode.getElementsByTagName("ScalarOperator").item(0);
+                				NamedNodeMap namedNodeMap = elementScalarOperator.getAttributes();
+                				getAttributeMap(namedNodeMap, mapOperationProperty);
+        					}else if("HashKeysBuild".equalsIgnoreCase(elementChildNode.getNodeName())){
+        						Element elementColumnReference = (Element) elementChildNode.getElementsByTagName("ColumnReference").item(0);
+        						NamedNodeMap namedNodeMap = elementColumnReference.getAttributes();
+        						mapOperationProperty.put("HashKeysBuild,HashKeysProbe", "");
+                				getAttributeMap(namedNodeMap, mapOperationProperty);
+        					}else if("HashKeysProbe".equalsIgnoreCase(elementChildNode.getNodeName())){
+        						Element elementColumnReference = (Element) elementChildNode.getElementsByTagName("ColumnReference").item(0);
+        						NamedNodeMap namedNodeMap = elementColumnReference.getAttributes();
+        						mapOperationProperty.put("HashKeysBuild,HashKeysProbe", "");
+                				getAttributeMap(namedNodeMap, mapOperationProperty);
+        					}
+        				}
         			}
         		}
         	}
@@ -793,7 +807,7 @@ public class MSSQLAnalyser extends AbstractDAO{
             for (int j = 0; j < attributeLength; j++) {
                 Node getAttribute = namedNodeMap.item(j);
                 String attributeName = getAttribute.getNodeName();
-                attributeName = "ScalarString".equalsIgnoreCase(attributeName) ? "Predicate" : attributeName;
+                attributeName = "ScalarString".equalsIgnoreCase(attributeName) ? "Predicate/ProbeResidual" : attributeName;
                 if(mapOperationProperty.get(attributeName) != null){
                 	mapOperationProperty.put(attributeName, mapOperationProperty.get(getAttribute.getNodeName()) + ", " + getAttribute.getNodeValue());
                 }else{
