@@ -48,6 +48,7 @@ public class HibernateAssist {
     private static final Logger logger = Logger.getLogger(HibernateAssist.class.getName());
     private String HTMLReportFolder;
     private String MSSQLExecutionPlanFile;
+    private SessionFactory objSessionFactory;
 
     public HibernateAssist(){
     	
@@ -55,6 +56,7 @@ public class HibernateAssist {
     
     public HibernateAssist(Session HibernateSession) {
         this.HibernateLocalSession = HibernateSession;
+        this.objSessionFactory = this.HibernateLocalSession.getSessionFactory();
     }
 
     /**
@@ -65,8 +67,7 @@ public class HibernateAssist {
      */
     public String getDatabaseDriver() throws SQLException {
         if (HibernateLocalSession instanceof Session) {
-            SessionFactory sessionFactory = HibernateLocalSession.getSessionFactory();
-            Settings settings = ((SessionFactoryImplementor) sessionFactory).getSettings();
+            Settings settings = ((SessionFactoryImplementor) this.objSessionFactory).getSettings();
             ConnectionProvider connectionProvider = settings.getConnectionProvider();
             Connection connection = connectionProvider.getConnection();
             return connection.getClass().getName();
@@ -84,8 +85,7 @@ public class HibernateAssist {
      */
     public String getDatabaseURL() throws SQLException {
         if (HibernateLocalSession instanceof Session) {
-            SessionFactory sessionFactory = HibernateLocalSession.getSessionFactory();
-            Settings settings = ((SessionFactoryImplementor) sessionFactory).getSettings();
+            Settings settings = ((SessionFactoryImplementor) this.objSessionFactory).getSettings();
             ConnectionProvider connectionProvider = settings.getConnectionProvider();
             Connection connection = connectionProvider.getConnection();
             DatabaseMetaData databaseMetaData = connection.getMetaData();
@@ -101,8 +101,7 @@ public class HibernateAssist {
      */
     public String getDialect() {
         if (HibernateLocalSession instanceof Session) {
-            SessionFactory sessionFactory = HibernateLocalSession.getSessionFactory();
-            Dialect dialect = ((SessionFactoryImplementor) sessionFactory).getDialect();
+            Dialect dialect = ((SessionFactoryImplementor) this.objSessionFactory).getDialect();
             return dialect.toString();
         }
         return null;
@@ -116,8 +115,7 @@ public class HibernateAssist {
      */
     public String getDatabaseName() throws SQLException {
         if (HibernateLocalSession instanceof Session) {
-            SessionFactory sessionFactory = HibernateLocalSession.getSessionFactory();
-            Settings settings = ((SessionFactoryImplementor) sessionFactory).getSettings();
+            Settings settings = ((SessionFactoryImplementor) this.objSessionFactory).getSettings();
             ConnectionProvider connectionProvider = settings.getConnectionProvider();
             Connection connection = connectionProvider.getConnection();
             return connection.getCatalog();
@@ -133,8 +131,7 @@ public class HibernateAssist {
      */
     public String getDatabaseUsername() throws SQLException {
         if (HibernateLocalSession instanceof Session) {
-            SessionFactory sessionFactory = HibernateLocalSession.getSessionFactory();
-            Settings settings = ((SessionFactoryImplementor) sessionFactory).getSettings();
+            Settings settings = ((SessionFactoryImplementor) this.objSessionFactory).getSettings();
             ConnectionProvider connectionProvider = settings.getConnectionProvider();
             Connection connection = connectionProvider.getConnection();
             DatabaseMetaData databaseMetaData = connection.getMetaData();
@@ -178,8 +175,7 @@ public class HibernateAssist {
         if (HibernateLocalSession instanceof Session) {
             Field field = SessionFactoryImpl.class.getDeclaredField("properties");
             field.setAccessible(true);
-            SessionFactory sessionFactory = HibernateLocalSession.getSessionFactory();
-            Properties properties = (Properties) field.get(sessionFactory);
+            Properties properties = (Properties) field.get(this.objSessionFactory);
             return properties.getProperty(HibernateProperty);
         }
         return null;
@@ -333,5 +329,13 @@ public class HibernateAssist {
 	 */
 	public void setMSSQLExecutionPlanFile(String mSSQLExecutionPlanFile) {
 		MSSQLExecutionPlanFile = mSSQLExecutionPlanFile;
+	}
+
+	public SessionFactory getObjSessionFactory() {
+		return objSessionFactory;
+	}
+
+	public void setObjSessionFactory(SessionFactory objSessionFactory) {
+		this.objSessionFactory = objSessionFactory;
 	}
 }
