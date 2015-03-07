@@ -27,6 +27,7 @@ import org.hibernate.loader.OuterJoinLoader;
 import org.hibernate.loader.criteria.CriteriaLoader;
 import org.hibernate.persister.entity.OuterJoinLoadable;
 
+import com.hibernateassist.basecode.CriteriaQueryValueTranslator;
 import com.hibernateassist.database.MSSQLAnalyser;
 
 
@@ -281,6 +282,20 @@ public class HibernateAssist {
     		MSSQLAnalyser objMSSQLAnalyser = new MSSQLAnalyser();
     		objMSSQLAnalyser.generateQueryReportFromFile(temporaryXMLFile.getAbsolutePath(), getHTMLReportFolder());
     	}
+    }
+    
+    /**
+     * Get {@link Criteria} query with values.
+     * <br/><br/>
+     * @author 0Signals
+     * @return {@link String}
+     */
+    public String getValuedCriteriaQuery(){
+    	if (getCriteria() instanceof Criteria) {
+    		CriteriaQueryValueTranslator objCriteriaQueryValueTranslator = new CriteriaQueryValueTranslator(objSessionFactory);
+    		return objCriteriaQueryValueTranslator.getValuedQuery(getCriteria());
+    	}
+    	return null;
     }
     
     /**
