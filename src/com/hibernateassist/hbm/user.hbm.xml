@@ -4,7 +4,7 @@
   <class name="com.hibernateassist.bean.User" table="user_master">
     <id name="id" type="int">
       <column name="id"/>
-      <generator class="assigned"/>
+      <generator class="identity"/>
     </id>
     <property name="Username" type="java.lang.String">
       <column name="username"/>
@@ -15,5 +15,9 @@
     <property name="Email" type="java.lang.String">
       <column name="email"/>
     </property>
+    <set name="Messages" cascade="refresh">
+		<key column="user_id"/>
+		<one-to-many class="com.hibernateassist.bean.Message"/>
+	</set>
   </class>
 </hibernate-mapping>

@@ -1,5 +1,8 @@
 package com.hibernateassist.bean;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author vicky.thakor
  */
@@ -8,6 +11,7 @@ public class User {
 	private String Username;
 	private String Password;
 	private String Email;
+	private Set<Message> Messages = new HashSet<Message>();
 	
 	public int getId() {
 		return id;
@@ -32,5 +36,11 @@ public class User {
 	}
 	public void setEmail(String email) {
 		Email = email;
+	}
+	public Set<Message> getMessages() {
+		return Messages;
+	}
+	public void setMessages(Set<Message> messages) {
+		Messages = messages;
 	}
 }
