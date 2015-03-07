@@ -20,5 +20,6 @@
     
     
     <mapping resource="com/hibernateassist/hbm/user.hbm.xml"/>
+    <mapping resource="com/hibernateassist/hbm/message.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>
