@@ -12,8 +12,5 @@
     <property name="messageText" type="java.lang.String">
       <column name="message_text"/>
     </property>
-    <property name="Username" type="java.lang.String">
-      <column name="username"/>
-    </property>
   </class>
 </hibernate-mapping>
