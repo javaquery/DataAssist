@@ -20,6 +20,8 @@ import org.hibernate.impl.CriteriaImpl;
 import org.hibernate.impl.CriteriaImpl.CriterionEntry;
 import org.hibernate.loader.criteria.CriteriaQueryTranslator;
 import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.hibernate.type.BooleanType;
+import org.hibernate.type.CustomType;
 import org.hibernate.type.StringType;
 import org.hibernate.type.TimestampType;
 
@@ -62,14 +64,20 @@ public class CriteriaQueryValueTranslator {
 					SimpleExpression simpleExpression = (SimpleExpression) criterion;
 					String strSimpleExpression = simpleExpression.toSqlString(criteria, criteriaQuery);					
 					TypedValue[] typedValues = simpleExpression.getTypedValues(criteria, criteriaQuery);
-					
 					String strSimpleExpressionImpl = "";
-					if(typedValues[0].getType() instanceof StringType){
-						strSimpleExpressionImpl = strSimpleExpression.replace("?", "\'"+typedValues[0].getValue().toString()+"\'");
+					
+					if(typedValues[0].getType() instanceof StringType
+							|| typedValues[0].getType() instanceof CustomType){
+						String strValue = typedValues[0].getValue().toString();
+						strValue = strValue.replace("'", "''");
+						strSimpleExpressionImpl = strSimpleExpression.replace("?", "\'"+ strValue +"\'");
 					}else if(typedValues[0].getType() instanceof TimestampType){
 						java.util.Date javaDateFormat = (Date) typedValues[0].getValue(); 
 						java.sql.Timestamp sqlTimeStamp = new java.sql.Timestamp(javaDateFormat.getTime());
 						strSimpleExpressionImpl = strSimpleExpression.replace("?", "\'"+sqlTimeStamp+"\'");
+					}else if(typedValues[0].getType() instanceof BooleanType){
+						int convertedBoolean = (Boolean) typedValues[0].getValue() ? 1 : 0;
+						strSimpleExpressionImpl = strSimpleExpression.replace("?", String.valueOf(convertedBoolean));
 					}else{
 						strSimpleExpressionImpl = strSimpleExpression.replace("?", typedValues[0].getValue().toString());
 					}
@@ -82,12 +90,18 @@ public class CriteriaQueryValueTranslator {
 					
 					String strInExpressionImpl = strInExpression;
 					for (int i = 0; i < typedValues.length; i++) {
-						if(typedValues[i].getType() instanceof StringType){
-							strInExpressionImpl = strInExpressionImpl.replaceFirst("\\?", "\'"+typedValues[i].getValue().toString()+"\'");
+						if(typedValues[0].getType() instanceof StringType
+								|| typedValues[0].getType() instanceof CustomType){
+							String strValue = typedValues[0].getValue().toString();
+							strValue = strValue.replace("'", "''");
+							strInExpressionImpl = strInExpressionImpl.replace("?", "\'"+ strValue +"\'");
 						}else if(typedValues[0].getType() instanceof TimestampType){
 							java.util.Date javaDateFormat = (Date) typedValues[0].getValue(); 
 							java.sql.Timestamp sqlTimeStamp = new java.sql.Timestamp(javaDateFormat.getTime());
 							strInExpressionImpl = strInExpressionImpl.replace("?", "\'"+sqlTimeStamp+"\'");
+						}else if(typedValues[0].getType() instanceof BooleanType){
+							int convertedBoolean = (Boolean) typedValues[0].getValue() ? 1 : 0;
+							strInExpressionImpl = strInExpressionImpl.replace("?", String.valueOf(convertedBoolean));
 						}else{
 							strInExpressionImpl = strInExpressionImpl.replaceFirst("\\?", typedValues[i].getValue().toString());
 						}
@@ -101,12 +115,18 @@ public class CriteriaQueryValueTranslator {
 
 					String strConjunctionImpl = strConjunction;
 					for (int i = 0; i < typedValues.length; i++) {
-						if(typedValues[i].getType() instanceof StringType){
-							strConjunctionImpl = strConjunctionImpl.replaceFirst("\\?", "\'"+typedValues[i].getValue().toString()+"\'");
+						if(typedValues[0].getType() instanceof StringType
+								|| typedValues[0].getType() instanceof CustomType){
+							String strValue = typedValues[0].getValue().toString();
+							strValue = strValue.replace("'", "''");
+							strConjunctionImpl = strConjunctionImpl.replace("?", "\'"+ strValue +"\'");
 						}else if(typedValues[0].getType() instanceof TimestampType){
 							java.util.Date javaDateFormat = (Date) typedValues[0].getValue(); 
 							java.sql.Timestamp sqlTimeStamp = new java.sql.Timestamp(javaDateFormat.getTime());
 							strConjunctionImpl = strConjunctionImpl.replace("?", "\'"+sqlTimeStamp+"\'");
+						}else if(typedValues[0].getType() instanceof BooleanType){
+							int convertedBoolean = (Boolean) typedValues[0].getValue() ? 1 : 0;
+							strConjunctionImpl = strConjunctionImpl.replace("?", String.valueOf(convertedBoolean));
 						}else{
 							strConjunctionImpl = strConjunctionImpl.replaceFirst("\\?", typedValues[i].getValue().toString());
 						}
@@ -120,12 +140,18 @@ public class CriteriaQueryValueTranslator {
 
 					String strDisjunctionImpl = strDisjunction;
 					for (int i = 0; i < typedValues.length; i++) {
-						if(typedValues[i].getType() instanceof StringType){
-							strDisjunctionImpl = strDisjunctionImpl.replaceFirst("\\?", "\'"+typedValues[i].getValue().toString()+"\'");
+						if(typedValues[0].getType() instanceof StringType
+								|| typedValues[0].getType() instanceof CustomType){
+							String strValue = typedValues[0].getValue().toString();
+							strValue = strValue.replace("'", "''");
+							strDisjunctionImpl = strDisjunctionImpl.replace("?", "\'"+ strValue +"\'");
 						}else if(typedValues[0].getType() instanceof TimestampType){
 							java.util.Date javaDateFormat = (Date) typedValues[0].getValue(); 
 							java.sql.Timestamp sqlTimeStamp = new java.sql.Timestamp(javaDateFormat.getTime());
 							strDisjunctionImpl = strDisjunctionImpl.replace("?", "\'"+sqlTimeStamp+"\'");
+						}else if(typedValues[0].getType() instanceof BooleanType){
+							int convertedBoolean = (Boolean) typedValues[0].getValue() ? 1 : 0;
+							strDisjunctionImpl = strDisjunctionImpl.replace("?", String.valueOf(convertedBoolean));
 						}else{
 							strDisjunctionImpl = strDisjunctionImpl.replaceFirst("\\?", typedValues[i].getValue().toString());
 						}
