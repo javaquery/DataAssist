@@ -158,6 +158,7 @@ public class MSSQLAnalyser extends AbstractDAO{
             	objMssqlQueryDetails.setExecutionCount(resultSet.getInt("execution_count"));
             	listMSSQLQueryDetails.add(objMssqlQueryDetails);
             }
+            resultSet.close();
             connection.close();
         }
 		
