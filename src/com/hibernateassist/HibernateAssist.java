@@ -29,6 +29,7 @@ import org.hibernate.persister.entity.OuterJoinLoadable;
 
 import com.hibernateassist.basecode.CriteriaQueryValueTranslator;
 import com.hibernateassist.database.MSSQLAnalyser;
+import com.hibernateassist.database.MySQLAnalyser;
 
 
 /**
@@ -61,10 +62,11 @@ public class HibernateAssist {
     }
 
     /**
+     * Retrieves Driver used for database {@link Connection}.
+     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
      * @throws SQLException in case of connection error
-     * Retrieves Driver used for database {@link Connection}.
      */
     public String getDatabaseDriver() throws SQLException {
         if (HibernateLocalSession instanceof Session) {
@@ -77,12 +79,12 @@ public class HibernateAssist {
     }
 
     /**
+     * Retrieves database connection URL with parameters
+     * i.e jdbc:jtds:sqlserver://127.0.0.1:1433/javaQuery;sendStringParametersAsUnicode=false
+     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
      * @throws SQLException in case of connection error
-     * 
-     * Retrieves database connection URL with parameters
-     * i.e jdbc:jtds:sqlserver://127.0.0.1:1433/javaQuery;sendStringParametersAsUnicode=false
      */
     public String getDatabaseURL() throws SQLException {
         if (HibernateLocalSession instanceof Session) {
@@ -96,9 +98,10 @@ public class HibernateAssist {
     }
 
     /**
+     * To get Hibernate dialect from current {@link Session}
+     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
-     * To get Hibernate dialect from current {@link Session}
      */
     public String getDialect() {
         if (HibernateLocalSession instanceof Session) {
@@ -109,10 +112,11 @@ public class HibernateAssist {
     }
 
     /**
+     * Retrieves currently connected database name from {@link Session}
+     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
      * @throws SQLException in case of connection error
-     * Retrieves currently connected database name from {@link Session}
      */
     public String getDatabaseName() throws SQLException {
         if (HibernateLocalSession instanceof Session) {
@@ -125,43 +129,81 @@ public class HibernateAssist {
     }
 
     /**
+     * Retrieves Username used for database {@link Connection}.
+     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
-     * @throws SQLException in case of connection error
-     * Retrieves Username used for database {@link Connection}.
+     * @throws {@link SQLException}
      */
     public String getDatabaseUsername() throws SQLException {
+    	String dialect = getDialect();
+    	String strUsername = null;
         if (HibernateLocalSession instanceof Session) {
             Settings settings = ((SessionFactoryImplementor) this.objSessionFactory).getSettings();
             ConnectionProvider connectionProvider = settings.getConnectionProvider();
             Connection connection = connectionProvider.getConnection();
             DatabaseMetaData databaseMetaData = connection.getMetaData();
-            return databaseMetaData.getUserName();
+            strUsername = databaseMetaData.getUserName();
+            
+            if("org.hibernate.dialect.MySQLDialect".equalsIgnoreCase(dialect)
+            		|| "org.hibernate.dialect.MySQLInnoDBDialect".equalsIgnoreCase(dialect)
+            		|| "org.hibernate.dialect.MySQLMyISAMDialect".equalsIgnoreCase(dialect)){
+            	strUsername = strUsername.substring(0, strUsername.indexOf("@"));
+            }
         }
-        return null;
+        return strUsername;
     }
 
     /**
+     * Retrieves Password from hibernate.cfg.xml only if its configured
+     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error or property not found in hibernate.cfg.xml)
      * @throws NoSuchFieldException
      * @throws IllegalArgumentException
      * @throws IllegalAccessException 
-     * Retrieves Password from hibernate.cfg.xml only if its configured
      */
     public String getDatabasePassword() throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         return getHibernateProperty("hibernate.connection.password");
     }
 
     /**
+     * Retrieves Database version.
+     * <br/><br/>
      * @author vicky.thakor
-     * @param {@link String} HibernateProperty
-     * @return {@link String} value or null(in case of connection error or property not found in hibernate.cfg.xml)
-     * @throws NoSuchFieldException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException 
-     * in case of connection error
-     * 
+     * @return {@link String} value or null(in case of connection error)
+     * @throws {@link SQLException}
+     */
+    public String getDatabaseVersion() throws SQLException{
+    	if (HibernateLocalSession instanceof Session) {
+            Settings settings = ((SessionFactoryImplementor) this.objSessionFactory).getSettings();
+            ConnectionProvider connectionProvider = settings.getConnectionProvider();
+            Connection connection = connectionProvider.getConnection();
+            DatabaseMetaData databaseMetaData = connection.getMetaData();
+            return databaseMetaData.getDatabaseProductVersion();
+        }
+        return null;
+    }
+    
+    /**
+     * Retrieves Database Product Name.
+     * <br/><br/>
+     * @author vicky.thakor
+     * @return {@link String} value or null(in case of connection error)
+     * @throws {@link SQLException}
+     */
+    public String getDatabaseProductName() throws SQLException{
+    	if (HibernateLocalSession instanceof Session) {
+            Settings settings = ((SessionFactoryImplementor) this.objSessionFactory).getSettings();
+            ConnectionProvider connectionProvider = settings.getConnectionProvider();
+            Connection connection = connectionProvider.getConnection();
+            DatabaseMetaData databaseMetaData = connection.getMetaData();
+            return databaseMetaData.getDatabaseProductName();
+        }
+        return null;
+    }
+    
+    /**
      * Retrieve Hibernate Properties from configuration file(i.e hibernate.cfg.xml) by its property name like...
      * <ul>
      *  <li>hibernate.show_sql</li>
@@ -170,7 +212,14 @@ public class HibernateAssist {
      *  <li>hibernate.generate_statistics</li>
      *  <li>etc...</li>
      * </ul>
-     * 
+     * <br/>
+     * @author vicky.thakor
+     * @param {@link String} HibernateProperty
+     * @return {@link String} value or null(in case of connection error or property not found in hibernate.cfg.xml)
+     * @throws NoSuchFieldException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException 
+     * in case of connection error
      */
     public String getHibernateProperty(String HibernateProperty) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         if (HibernateLocalSession instanceof Session) {
@@ -183,13 +232,14 @@ public class HibernateAssist {
     }
 
     /**
+     * Retrieve SQL Query from {@link Criteria}.
+     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error or Criteria error)
      * @throws NoSuchFieldException
      * @throws IllegalArgumentException
      * @throws IllegalAccessException 
      * in case of connection error
-     * Retrieve SQL Query from {@link Criteria}.
      */
     public String getCriteriaQuery() throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         if (getCriteria() instanceof Criteria) {
@@ -214,6 +264,8 @@ public class HibernateAssist {
     /**
      * This method is cost a lot on database. Use this method to analyse your Criteria at developing environment.
      * Remove this method call at production server.
+     * <br/><br/>
+     * @author vicky.thakor
      */
     public void analyseCriteria() {
         try {
@@ -236,7 +288,16 @@ public class HibernateAssist {
                 }else if("org.hibernate.dialect.MySQLDialect".equalsIgnoreCase(dialect)
                 		|| "org.hibernate.dialect.MySQLInnoDBDialect".equalsIgnoreCase(dialect)
                 		|| "org.hibernate.dialect.MySQLMyISAMDialect".equalsIgnoreCase(dialect)){
-                	System.out.println("Under Construction");
+                	MySQLAnalyser objMySQLAnalyser = new MySQLAnalyser();
+                	objMySQLAnalyser.setDatabaseDriver(getDatabaseDriver());
+                	objMySQLAnalyser.setDatabaseURL(getDatabaseURL());
+                	objMySQLAnalyser.setDatabaseUsername(getDatabaseUsername());
+                	objMySQLAnalyser.setDatabasePassword(getDatabasePassword());
+                	objMySQLAnalyser.setDatabaseVersion(getDatabaseVersion());
+                	String valuedQuery = getValuedCriteriaQuery();
+        			if(valuedQuery != null && !valuedQuery.isEmpty()){
+        				objMySQLAnalyser.generateQueryReport(valuedQuery, getHTMLReportFolder());
+        			}
                 }
             }
         } catch (Exception e) {
