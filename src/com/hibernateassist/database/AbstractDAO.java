@@ -8,6 +8,8 @@ public abstract class AbstractDAO {
 	protected String DatabaseURL;
 	protected String DatabaseUsername;
 	protected String DatabasePassword;
+	protected String DatabaseVersion;
+	protected String DatabaseProductName;
     
     /**
      * Get database driver
@@ -72,4 +74,20 @@ public abstract class AbstractDAO {
     public void setDatabasePassword(String DatabasePassword) {
         this.DatabasePassword = DatabasePassword;
     }
+
+	public String getDatabaseVersion() {
+		return DatabaseVersion;
+	}
+
+	public void setDatabaseVersion(String databaseVersion) {
+		DatabaseVersion = databaseVersion;
+	}
+
+	public String getDatabaseProductName() {
+		return DatabaseProductName;
+	}
+
+	public void setDatabaseProductName(String databaseProductName) {
+		DatabaseProductName = databaseProductName;
+	}
 }
