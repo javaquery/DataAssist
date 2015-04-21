@@ -7,6 +7,10 @@ import java.util.Date;
  */
 public class CommonUtil {
 
+	public enum jsPlumbArrowPosition{
+		TopCenter, BottomCenter, LeftMiddle, RightMiddle, Center, TopRight, BottomRight, TopLeft, BottomLeft
+	}
+	
     /**
      * @author vicky.thakor
      * @param query
@@ -85,6 +89,12 @@ public class CommonUtil {
                 + ".stylistTable{border-collapse: separate;border-spacing: 0;border-color: #e1e1e1;border-width: 1px 0 0 1px;border-style: solid;}"
                 + ".stylistTable tbody{background-color: skyblue; color: white;}"
                 + ".nodeImage{margin: 0px auto;cursor:pointer}"
+                + ".connectionDot{border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px;box-shadow:0 0 8px rgba(0, 0, 0, .8);-webkit-box-shadow:0 0 8px rgba(0, 0, 0, .8);-moz-box-shadow:0 0 8px rgba(0, 0, 0, .8);margin: 0px auto;margin-bottom: 99px;width: 10px;height: 10px;}"
+                //+ "nestedLoopDivMySQL {-webkit-transform: rotate(45deg);  /* Chrome, Safari 3.1+ */-moz-transform: rotate(45deg);  /* Firefox 3.5-15 */-ms-transform: rotate(45deg);  /* IE 9 */-o-transform: rotate(45deg);  /* Opera 10.50-12.00 */transform: rotate(45deg);  /* Firefox 16+, IE 10+, Opera 12.50+ */; border: 2px solid gray;width: 50px;height: 50px;margin: 0px auto;margin-bottom: 77px;}"
+                //+ "nestedLoopDivMySQL div{-webkit-transform: rotate(-45deg);  /* Chrome, Safari 3.1+ */-moz-transform: rotate(-45deg);  /* Firefox 3.5-15 */-ms-transform: rotate(-45deg);  /* IE 9 */-o-transform: rotate(-45deg);  /* Opera 10.50-12.00 */transform: rotate(-45deg);  /* Firefox 16+, IE 10+, Opera 12.50+ */;margin: -10px -12px -12px -10px;width: 70px;height: 70px;text-align: center;}"
+                + ".nestedLoopDivMySQL { margin: 0px auto;margin-bottom:77px; border: 2px solid gray; width: 50px; height: 50px; text-align:center;}"
+                + ".tableBlockMySQL{display: inline-block; text-align:center;margin-right: 100px}"
+                + ".tableBlockContentMySQL{color:white; padding: 5px; border: 1px solid black; width: 170px; height: 20px; text-align:center}"
                 + "</style>\n"
                 + "</head>\n"
                 + "<body>\n"
@@ -138,13 +148,13 @@ public class CommonUtil {
      * @param TargetNode
      * @return
      */
-    public static String getjsPlumbScript(String SourceNode, String TargetNode){
+    public static String getjsPlumbScript(String SourceNode, String TargetNode, jsPlumbArrowPosition SourceArrowPosition, jsPlumbArrowPosition TargetArrowPosition){
     	StringBuilder jsPlumb = new StringBuilder("");
     	jsPlumb.append("jsPlumb.bind(\"ready\", function() {");
     	jsPlumb.append("jsPlumb.connect({");
-    	jsPlumb.append("source: \""+SourceNode+"\",");
-    	jsPlumb.append("target: \""+TargetNode+"\",");
-    	jsPlumb.append("anchors: [\"LeftMiddle\",\"RightMiddle\"],");
+    	jsPlumb.append("source: \"").append(SourceNode).append("\",");
+    	jsPlumb.append("target: \"").append(TargetNode).append("\",");
+    	jsPlumb.append("anchors: [\"").append(SourceArrowPosition).append("\",\"").append(TargetArrowPosition).append("\"],");
     	jsPlumb.append("endpoint: [\"Dot\", {radius: 1}],");
     	jsPlumb.append("endpointStyle: {fillStyle: \"#5b9ada\"},");
     	jsPlumb.append("setDragAllowedWhenFull: true,");
