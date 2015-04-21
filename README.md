@@ -64,5 +64,8 @@ objHibernateAssist.setHTMLReportFolder("C:\\Users\\javaQuery\\Desktop\\HTMLRepor
 objHibernateAssist.analyseMSSQLPlan();
 </pre>
 
+#Minimum Requirement
+Hibernate 3.5 and above
+
 #Warning
 Hibernate Assist is analysis tool and should be used at development phase. It'll cost a lot on Production Server. Please remove Hibernate Assist call in Final Production code.
