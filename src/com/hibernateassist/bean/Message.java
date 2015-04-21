@@ -3,7 +3,7 @@ package com.hibernateassist.bean;
 public class Message {
 	private int id;
 	private int userID;
-	private int messageText;
+	private String messageText;
 	private String Username;
 	
 	public int getId() {
@@ -18,16 +18,17 @@ public class Message {
 	public void setUserID(int userID) {
 		this.userID = userID;
 	}
-	public int getMessageText() {
-		return messageText;
-	}
-	public void setMessageText(int messageText) {
-		this.messageText = messageText;
-	}
+	
 	public String getUsername() {
 		return Username;
 	}
 	public void setUsername(String username) {
 		Username = username;
+	}
+	public String getMessageText() {
+		return messageText;
+	}
+	public void setMessageText(String messageText) {
+		this.messageText = messageText;
 	}
 }
