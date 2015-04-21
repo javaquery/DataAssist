@@ -37,6 +37,7 @@ import org.xml.sax.InputSource;
 
 import com.hibernateassist.bean.MSSQLQueryDetails;
 import com.hibernateassist.common.CommonUtil;
+import com.hibernateassist.common.CommonUtil.jsPlumbArrowPosition;
 
 /**
  * @author vicky.thakor
@@ -452,7 +453,7 @@ public class MSSQLAnalyser extends AbstractDAO{
                                     /* Set Source and Target node for jsPlumb */
                                     String sourceNode = "parentTable"+childNodeID;
                                     String targetNode = oldParentID == -1 ? "rootnode" : "parentTable"+oldParentID; 
-                                    sb.append(CommonUtil.getjsPlumbScript(sourceNode, targetNode));
+                                    sb.append(CommonUtil.getjsPlumbScript(sourceNode, targetNode, jsPlumbArrowPosition.LeftMiddle, jsPlumbArrowPosition.RightMiddle));
                                 }
                             }
                         }
