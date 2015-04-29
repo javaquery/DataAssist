@@ -296,7 +296,7 @@ public class HibernateAssist {
                 	objMySQLAnalyser.setDatabaseVersion(getDatabaseVersion());
                 	String valuedQuery = getValuedCriteriaQuery();
         			if(valuedQuery != null && !valuedQuery.isEmpty()){
-        				objMySQLAnalyser.generateQueryReport(valuedQuery, getHTMLReportFolder());
+        				objMySQLAnalyser.generateQueryReport(getCriteriaQuery(), valuedQuery, getHTMLReportFolder());
         			}
                 }
             }
