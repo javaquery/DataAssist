@@ -240,6 +240,7 @@ public class MSSQLAnalyser extends AbstractDAO{
 	            	stringBuilderHTMLReport.append("<div class=\"whiteFadedbox\">");
 	            	ScanMissingIndexes(listMissingIndexNode, stringBuilderHTMLReport);
 	            	stringBuilderHTMLReport.append("</div>");
+	            	stringBuilderHTMLReport.append("</div>");
                 }
 	            
 			}else{
@@ -340,7 +341,7 @@ public class MSSQLAnalyser extends AbstractDAO{
                         }
 
                         stringBuilder.append("</tr></tbody></table><br/>");
-                        stringBuilder.append("<div style=\"width:100%;overflow:scroll;height:100px\">");
+                        stringBuilder.append("<div style=\"width:100%;overflow:scroll;height:100px;font-size:15px\">");
                         stringBuilder.append(queryAttributes.getNamedItem("StatementText").getNodeValue());
                         stringBuilder.append("</div>");
                         stringBuilder.append("</div>");
