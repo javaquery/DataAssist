@@ -19,5 +19,9 @@
 		<key column="user_id"/>
 		<one-to-many class="com.hibernateassist.bean.Message"/>
 	</set>
+	<set name="CreditCard" cascade="refresh">
+		<key column="user_id"/>
+		<one-to-many class="com.hibernateassist.bean.CreditCard"/>
+	</set>
   </class>
 </hibernate-mapping>

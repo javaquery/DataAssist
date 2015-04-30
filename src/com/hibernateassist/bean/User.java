@@ -12,6 +12,7 @@ public class User {
 	private String Password;
 	private String Email;
 	private Set<Message> Messages = new HashSet<Message>();
+	private Set<CreditCard> CreditCard = new HashSet<CreditCard>();
 	
 	public int getId() {
 		return id;
@@ -42,5 +43,11 @@ public class User {
 	}
 	public void setMessages(Set<Message> messages) {
 		Messages = messages;
+	}
+	public Set<CreditCard> getCreditCard() {
+		return CreditCard;
+	}
+	public void setCreditCard(Set<CreditCard> creditCard) {
+		CreditCard = creditCard;
 	}
 }
