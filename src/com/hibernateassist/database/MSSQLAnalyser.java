@@ -1,14 +1,7 @@
 package com.hibernateassist.database;
 
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -24,7 +17,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -218,7 +210,7 @@ public class MSSQLAnalyser extends AbstractDAO{
             		getQueryProperties(listQueryStatement, stringBuilderHTMLReport);
             		stringBuilderHTMLReport.append("<div class=\"graphical_data\">");
             	 	stringBuilderHTMLReport.append("<div class=\"operation_header\">");
-                    stringBuilderHTMLReport.append("<h3>Execution Plan</h3>");
+                    stringBuilderHTMLReport.append("<h3>Execution Plan - Microsoft SQL Server</h3>");
                     stringBuilderHTMLReport.append("It is the graphical representation of query executed on database. Each node in it plays significant role in query. Click on node for more information.");
                     stringBuilderHTMLReport.append("</div>");
                     stringBuilderHTMLReport.append("<div style=\"position:relative\">");
@@ -341,7 +333,7 @@ public class MSSQLAnalyser extends AbstractDAO{
                         }
 
                         stringBuilder.append("</tr></tbody></table><br/>");
-                        stringBuilder.append("<div style=\"width:100%;overflow:scroll;height:100px;font-size:15px\">");
+                        stringBuilder.append("<div style=\"overflow:scroll;height:100px;font-size:15px\">");
                         stringBuilder.append(queryAttributes.getNamedItem("StatementText").getNodeValue());
                         stringBuilder.append("</div>");
                         stringBuilder.append("</div>");
@@ -1201,13 +1193,13 @@ public class MSSQLAnalyser extends AbstractDAO{
     private void createHTMLReportFile(String HTMLContent, String reportFolderPath){
     	File reportFolder = new File(reportFolderPath);
 		if(reportFolder.exists()){
-			copyJavaScriptAndImageFile(reportFolderPath);
-			File createHTMLReport = new File(reportFolderPath + File.separatorChar + "HibernateAssist_" + getQueryHash() + ".html");
+			new CommonUtil().copyJavaScriptAndImageFile(reportFolderPath);
+			File createHTMLReport = new File(reportFolderPath + File.separatorChar + "HibernateAssist_MSSQL_" + getQueryHash() + ".html");
             if (createHTMLReport.exists()) {
                 createHTMLReport.delete();
             }
             try {
-                PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "HibernateAssist_" + getQueryHash() + ".html", "UTF-8");
+                PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "HibernateAssist_MSSQL_" + getQueryHash() + ".html", "UTF-8");
                 writer.write(HTMLContent.toString());
                 writer.close();
                 String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
@@ -1220,13 +1212,13 @@ public class MSSQLAnalyser extends AbstractDAO{
 		}else{
 			logger.info("Can't find your custom report folder");
             reportFolderPath = System.getProperty("user.home");
-            copyJavaScriptAndImageFile(reportFolderPath);
-            File createHTMLReport = new File(reportFolderPath + File.separatorChar + "MSSQL_HibernateAssist_" + getQueryHash() + ".html");
+            new CommonUtil().copyJavaScriptAndImageFile(reportFolderPath);
+            File createHTMLReport = new File(reportFolderPath + File.separatorChar + "HibernateAssist_MSSQL_" + getQueryHash() + ".html");
             if (createHTMLReport.exists()) {
                 createHTMLReport.delete();
             }
             try {
-                PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "MSSQL_HibernateAssist_" + getQueryHash() + ".html", "UTF-8");
+                PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "HibernateAssist_MSSQL_" + getQueryHash() + ".html", "UTF-8");
                 writer.write(HTMLContent.toString());
                 writer.close();
                 String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
@@ -1236,52 +1228,6 @@ public class MSSQLAnalyser extends AbstractDAO{
             } catch (UnsupportedEncodingException ex) {
                 Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
             }
-		}
-    }
-    
-    /**
-     * Copy .js and .png file from jar to report folder.
-     * <br/><br/>
-     * @author vicky.thakor
-     * @param reportFolderPath
-     */
-    private void copyJavaScriptAndImageFile(String reportFolderPath){
-    	List<String> files = new ArrayList<String>();
-    	files.add("combine_icon_hibernate_assist.png");
-    	files.add("jquery-1.8.2.min.js");
-    	files.add("jquery.jsPlumb-1.3.3-all.js");
-    	
-    	try {
-	    	for(String filename : files){
-	    		File copyFile = new File(reportFolderPath + File.separatorChar + filename);
-	    		if(filename.endsWith(".js")){
-	    			/* Copy .js file if not exists */
-	    			if(!copyFile.exists()){
-	    				InputStream objInputStream = getClass().getResourceAsStream("/com/hibernateassist/files/"+filename);
-	    				BufferedReader objBufferedReader = new BufferedReader(new InputStreamReader(objInputStream));
-	    				StringBuilder objStringBuilder = new StringBuilder();
-	    				String line;
-						while ((line = objBufferedReader.readLine()) != null) {
-							objStringBuilder.append(line);
-							objStringBuilder.append(System.getProperty("line.separator"));
-						}
-						String fileContent = objStringBuilder.toString();
-						/* Write to destination file. */
-						copyFile.createNewFile();
-		    	        BufferedWriter objBufferedWriter = new BufferedWriter(new FileWriter(copyFile));
-		    	        objBufferedWriter.write(fileContent);
-		    	        objBufferedWriter.close();
-		    	        
-		    	        objBufferedReader.close();
-		    	        objInputStream.close();
-	    			}
-	    		}else{
-	    			BufferedImage objBufferedImage = ImageIO.read(getClass().getResourceAsStream("/com/hibernateassist/files/"+filename));
-	    			ImageIO.write(objBufferedImage, "PNG", copyFile);
-	    		}
-	    	}
-    	} catch (IOException e) {
-			e.printStackTrace();
 		}
     }
     
