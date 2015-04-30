@@ -1,6 +1,5 @@
 package com.hibernateassist.basecode;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -188,7 +187,7 @@ public class CriteriaQueryValueTranslator {
 	 * @param ClassName
 	 * @return {@link Map<String, String>}
 	 */
-	public Map<String, String> getAliasToRealColumnNameMap(String ClassName){
+	private Map<String, String> getAliasToRealColumnNameMap(String ClassName){
 		AliasToColumNameMap = new HashMap<String, String>();
 		try {
 			/* Get ClassMetadata(Table/Bean) from SessionFactory */
