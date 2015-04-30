@@ -1,6 +1,19 @@
 package com.hibernateassist.common;
 
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
+
+import javax.imageio.ImageIO;
 
 /**
  * @author vicky.thakor
@@ -10,6 +23,8 @@ public class CommonUtil {
 	public enum jsPlumbArrowPosition{
 		TopCenter, BottomCenter, LeftMiddle, RightMiddle, Center, TopRight, BottomRight, TopLeft, BottomLeft
 	}
+
+	private static String alphabet = "G8abHcId1J23Kefg9L0MhOPijkQlRmnSopT45UVqrWsFXtuY6EZ7vwCxByzA";
 	
     /**
      * @author vicky.thakor
@@ -173,6 +188,7 @@ public class CommonUtil {
 	    			 +"</ul>"
 	    			 +"<br/>"
 	    			 +"<div style=\"text-align:center\">"
+	    			 +"<a class=\"externalLink\" href=\"http://www.javaquery.com/p/hibernateassist.html\" target=\"_blank\">Download Library</a>"
 	    			 +"<ul class=\"ul_links\">"
 	    			 +"<li><a class=\"externalLink\" href=\"http://www.javaquery.com\" target=\"_blank\">www.javaquery.com</li>"
 	    			 +"<li><a class=\"externalLink\" href=\"http://www.facebook.com/thejavaquery\" target=\"_blank\">facebook.com/thejavaquery</a></li>"
@@ -213,6 +229,69 @@ public class CommonUtil {
     	jsPlumb.append("});");
     	jsPlumb.append("});");
     	return jsPlumb.toString();
+    }
+    
+    /**
+     * Copy .js and .png file from jar to report folder.
+     * <br/><br/>
+     * @author vicky.thakor
+     * @param reportFolderPath
+     */
+    public void copyJavaScriptAndImageFile(String reportFolderPath){
+    	List<String> files = new ArrayList<String>();
+    	files.add("combine_icon_hibernate_assist.png");
+    	files.add("jquery-1.8.2.min.js");
+    	files.add("jquery.jsPlumb-1.3.3-all.js");
+    	
+    	try {
+	    	for(String filename : files){
+	    		File copyFile = new File(reportFolderPath + File.separatorChar + filename);
+	    		if(filename.endsWith(".js")){
+	    			/* Copy .js file if not exists */
+	    			if(!copyFile.exists()){
+	    				InputStream objInputStream = getClass().getResourceAsStream("/com/hibernateassist/files/"+filename);
+	    				BufferedReader objBufferedReader = new BufferedReader(new InputStreamReader(objInputStream));
+	    				StringBuilder objStringBuilder = new StringBuilder();
+	    				String line;
+						while ((line = objBufferedReader.readLine()) != null) {
+							objStringBuilder.append(line);
+							objStringBuilder.append(System.getProperty("line.separator"));
+						}
+						String fileContent = objStringBuilder.toString();
+						/* Write to destination file. */
+						copyFile.createNewFile();
+		    	        BufferedWriter objBufferedWriter = new BufferedWriter(new FileWriter(copyFile));
+		    	        objBufferedWriter.write(fileContent);
+		    	        objBufferedWriter.close();
+		    	        
+		    	        objBufferedReader.close();
+		    	        objInputStream.close();
+	    			}
+	    		}else{
+	    			BufferedImage objBufferedImage = ImageIO.read(getClass().getResourceAsStream("/com/hibernateassist/files/"+filename));
+	    			ImageIO.write(objBufferedImage, "PNG", copyFile);
+	    		}
+	    	}
+    	} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    /**
+     * Generate random String by providing length.<br/><br/>
+     * @author vicky.thakor
+     * @param length
+     * @return
+     */
+    public static final String getRandomString(int length) {
+        Random rand = new Random();
+        String token = "";
+        char tokenChar = '\0';
+        for (int i = 0; i < length; i++) {
+            tokenChar = alphabet.charAt(rand.nextInt(alphabet.length()));
+            token += tokenChar;
+        }
+        return token;
     }
     
 	/**
