@@ -4,7 +4,6 @@ public class Message {
 	private int id;
 	private int userID;
 	private String messageText;
-	private String Username;
 	
 	public int getId() {
 		return id;
@@ -17,13 +16,6 @@ public class Message {
 	}
 	public void setUserID(int userID) {
 		this.userID = userID;
-	}
-	
-	public String getUsername() {
-		return Username;
-	}
-	public void setUsername(String username) {
-		Username = username;
 	}
 	public String getMessageText() {
 		return messageText;
