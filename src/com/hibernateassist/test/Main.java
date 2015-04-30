@@ -28,7 +28,9 @@ public class Main {
 	        Session objSession = objSessionFactory.openSession();
 	        
 	        Criteria criteria = objSession.createCriteria(User.class);
-            criteria.add(Restrictions.eq("Username", "vicky.thakor"));
+	        criteria.createAlias("Messages", "Messages");
+	        criteria.createAlias("CreditCard", "CreditCard");
+            criteria.add(Restrictions.eq("Email", "vicky.thakor@javaquery.com"));
 	        List<User> listUser = criteria.list();
 	        
 	        HibernateAssist objHibernateAssist = new HibernateAssist(objSession);
