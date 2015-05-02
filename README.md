@@ -26,10 +26,23 @@ Hibernate is one of the greatest creation but now developer don't care about que
 		<td>✔ Access any hibernate.cfg.xml Property</td>
 		<td>✔ Get Query from Criteria</td>
 	</tr>
+	<tr>
+		<td>✔ Get valued query from Criteria</td>
+		<td></td>
+	</tr>
+</table>
+
+#Database Support
+<table>
+	<tr>
+		<td>✔ Microsoft SQL Server</td>
+		<td>✔ MySQL (5.6 or above)</td>
+	</tr>
 </table>
 
 #Online Sample Report
-<a href="http://javaquery.github.io/HibernateAssist/" target="_blank">http://javaquery.github.io/HibernateAssist/</a>
+Microsoft SQL Server: <a href="http://javaquery.github.io/HibernateAssist/" target="_blank">http://javaquery.github.io/HibernateAssist/</a><br/>
+MySQL: <a href="http://javaquery.github.io/HibernateAssist/mysql" target="_blank">http://javaquery.github.io/HibernateAssist/mysql</a>
 
 #Source Code (Criteria Analysis)
 <pre>
@@ -62,6 +75,18 @@ HibernateAssist objHibernateAssist = new HibernateAssist();
 objHibernateAssist.setMSSQLExecutionPlanFile("C:\\Users\\javaQuery\\Desktop\\HTMLReport\\SQL Plans\\ComplexQuery.sqlplan");
 objHibernateAssist.setHTMLReportFolder("C:\\Users\\javaQuery\\Desktop\\HTMLReport");
 objHibernateAssist.analyseMSSQLPlan();
+</pre>
+
+#Source Code (Get valued query from Criteria)
+<pre>
+Criteria criteria = objSession.createCriteria(User.class);
+criteria.add(Restrictions.eq("Username", "vicky.thakor"));
+List&lt;User&gt; listUser = criteria.list();
+
+HibernateAssist objHibernateAssist = new HibernateAssist(objSession);
+objHibernateAssist.setCriteria(criteria);
+String strQuery = objHibernateAssist.getValuedCriteriaQuery();
+System.out.println(strQuery);
 </pre>
 
 #Minimum Requirement
