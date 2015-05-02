@@ -1,0 +1,1 @@
+You will need JSON library to support MySQL report. Download json-rpc-1.0.jar if you don't have one.
