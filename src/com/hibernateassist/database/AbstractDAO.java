@@ -1,5 +1,8 @@
 package com.hibernateassist.database;
 
+import org.hibernate.Session;
+
+
 /**
  * @author vicky.thakor
  */
@@ -10,6 +13,7 @@ public abstract class AbstractDAO {
 	protected String DatabasePassword;
 	protected String DatabaseVersion;
 	protected String DatabaseProductName;
+	protected Session HibernateSession;
     
     /**
      * Get database driver
@@ -89,5 +93,13 @@ public abstract class AbstractDAO {
 
 	public void setDatabaseProductName(String databaseProductName) {
 		DatabaseProductName = databaseProductName;
+	}
+
+	public Session getHibernateSession() {
+		return HibernateSession;
+	}
+
+	public void setHibernateSession(Session hibernateSession) {
+		HibernateSession = hibernateSession;
 	}
 }
