@@ -1,14 +1,13 @@
 package com.hibernateassist.database;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -20,6 +19,7 @@ import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.hibernate.SQLQuery;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -103,29 +103,20 @@ public class MSSQLAnalyser extends AbstractDAO{
 		
 		if(query == null || query.isEmpty()){
 			logger.info("Please provide valid query");
-		}else if (getDatabaseDriver() == null || getDatabaseDriver().isEmpty()) {
-            logger.info("Provide database driver string");
-        } else if (getDatabaseURL() == null || getDatabaseURL().isEmpty()) {
-            logger.info("Provide database url");
-        } else if (getDatabaseUsername() == null || getDatabaseUsername().isEmpty()) {
-            logger.info("Provide database username");
-        } else if (getDatabasePassword() == null || getDatabasePassword().isEmpty()) {
-            logger.info("Provide database password");
-        } else {
-        	query = CommonUtil.replaceQuestionMarkWithP(query);
-        	
-        	/**
+		}else if(getHibernateSession() != null){
+			BufferedReader objBufferedReader = null;
+			
+			query = CommonUtil.replaceQuestionMarkWithP(query);
+			/**
         	 * Microsoft SQL Server can process String of 2000 character only in `LIKE` clause.
         	 * We'll trim last 2000 Characters as it contains `WHERE`, `JOIN`, etc... clause and that makes query unique.
         	 */
-        	if(query != null && !query.isEmpty() && query.length() > 2000){
+			if(query != null && !query.isEmpty() && query.length() > 2000){
             	int position = query.length() - 2000;
             	query = query.substring(position, query.length());
             }
-        	
-        	Class.forName(getDatabaseDriver());
-            Connection connection = DriverManager.getConnection(getDatabaseURL(), getDatabaseUsername(), getDatabasePassword());
-            PreparedStatement preparedStatement = connection.prepareStatement("WITH XMLNAMESPACES (default 'http://schemas.microsoft.com/sqlserver/2004/07/showplan') "
+			
+			SQLQuery objSQLQuery = getHibernateSession().createSQLQuery("WITH XMLNAMESPACES (default 'http://schemas.microsoft.com/sqlserver/2004/07/showplan') "
                     + "SELECT "
                     + "Cast('<?SQL ' + st.text + ' ?>' as xml) sql_text, "
                     + "pl.query_plan, "
@@ -138,22 +129,41 @@ public class MSSQLAnalyser extends AbstractDAO{
                     + "Cross Apply sys.dm_exec_sql_text(ps.sql_handle) st "
                     + "Cross Apply sys.dm_exec_query_plan(ps.plan_handle) pl "
                     + "WHERE st.text like '%" + query + "' AND  st.text NOT LIKE '%sys.dm_exec_query_stats%'");
-            
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while(resultSet.next()){
-            	MSSQLQueryDetails objMssqlQueryDetails = new MSSQLQueryDetails();
-            	objMssqlQueryDetails.setSqlText(resultSet.getString("sql_text"));
-            	objMssqlQueryDetails.setQueryPlan(resultSet.getString("query_plan"));
-            	objMssqlQueryDetails.setLastExecutionTime(resultSet.getString("last_execution_time"));
-            	objMssqlQueryDetails.setLastElapsedTime(resultSet.getInt("last_elapsed_time"));
-            	objMssqlQueryDetails.setLastLogicalReads(resultSet.getInt("last_logical_reads"));
-            	objMssqlQueryDetails.setLastLogicalWrites(resultSet.getInt("last_logical_writes"));
-            	objMssqlQueryDetails.setExecutionCount(resultSet.getInt("execution_count"));
+			List<Object[]> executionPlanDetails = objSQLQuery.list();
+			for(Object[] obj : executionPlanDetails){
+				MSSQLQueryDetails objMssqlQueryDetails = new MSSQLQueryDetails();
+				Clob clobXML = (Clob) obj[1];
+				StringBuilder objStringBuilder = new StringBuilder("");
+				String line;
+				try {
+					objBufferedReader = new BufferedReader(clobXML.getCharacterStream());
+					while ((line = objBufferedReader.readLine())!=null) {
+						objStringBuilder.append(line);
+						objStringBuilder.append(System.getProperty("line.separator"));
+				    }
+				} catch (Exception e) {
+					e.printStackTrace();
+				}finally{
+					if(objBufferedReader != null){
+						try {
+							objBufferedReader.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				
+            	objMssqlQueryDetails.setSqlText(String.valueOf(obj[0]));
+            	objMssqlQueryDetails.setQueryPlan(objStringBuilder.toString());
+            	objMssqlQueryDetails.setExecutionCount(Integer.valueOf(String.valueOf(obj[2])));
+            	objMssqlQueryDetails.setLastExecutionTime(String.valueOf(obj[3]));
+            	objMssqlQueryDetails.setLastElapsedTime(Integer.valueOf(String.valueOf(obj[4])));
+            	objMssqlQueryDetails.setLastLogicalReads(Integer.valueOf(String.valueOf(obj[5])));
+            	objMssqlQueryDetails.setLastLogicalWrites(Integer.valueOf(String.valueOf(obj[6])));
+            	
             	listMSSQLQueryDetails.add(objMssqlQueryDetails);
-            }
-            resultSet.close();
-            connection.close();
-        }
+			}
+		}
 		
 		return listMSSQLQueryDetails;
 	}
