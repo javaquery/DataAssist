@@ -4,16 +4,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.hibernate.SQLQuery;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -110,35 +108,19 @@ public class MySQLAnalyser extends AbstractDAO{
 		MySQLQueryDetails objMySQLQueryDetails = new MySQLQueryDetails();
 		if(query == null || query.isEmpty()){
 			logger.info("Please provide valid query");
-		}else if (getDatabaseDriver() == null || getDatabaseDriver().isEmpty()) {
-            logger.info("Provide database driver string");
-        } else if (getDatabaseURL() == null || getDatabaseURL().isEmpty()) {
-            logger.info("Provide database url");
-        } else if (getDatabaseUsername() == null || getDatabaseUsername().isEmpty()) {
-            logger.info("Provide database username");
-        } else if (getDatabasePassword() == null || getDatabasePassword().isEmpty()) {
-            logger.info("Provide database password");
-        } else {
-        	Class.forName(getDatabaseDriver());
-            Connection connection = DriverManager.getConnection(getDatabaseURL(), getDatabaseUsername(), getDatabasePassword());
-            if(getDatabaseVersion() != null && !getDatabaseVersion().isEmpty() && getDatabaseVersion().indexOf(".") > 0){
-            	String strDatabaseVersion = getDatabaseVersion();
-            	strDatabaseVersion = strDatabaseVersion.substring(0, strDatabaseVersion.indexOf(".") + 2);
-            	double doubleVersion = Double.valueOf(strDatabaseVersion);
-            	/**
-            	 * MySQL 5.6 and above supports EXPLAIN with JSON format.
-            	 */
-            	if(doubleVersion >= 5.6){
-            		PreparedStatement preparedStatement = connection.prepareStatement("EXPLAIN format = JSON "+query);
-            		ResultSet resultSet = preparedStatement.executeQuery();
-            		if(resultSet.next()){
-            			objMySQLQueryDetails.setQueryPlan(resultSet.getString(1));
-            		}
-            		resultSet.close();
-            	}
-            }
-            connection.close();
-        }
+		}else if(getHibernateSession() != null){
+			String strDatabaseVersion = getDatabaseVersion();
+        	strDatabaseVersion = strDatabaseVersion.substring(0, strDatabaseVersion.indexOf(".") + 2);
+        	double doubleVersion = Double.valueOf(strDatabaseVersion);
+        	/**
+        	 * MySQL 5.6 and above supports EXPLAIN with JSON format.
+        	 */
+        	if(doubleVersion >= 5.6){
+        		SQLQuery objSQLQuery = getHibernateSession().createSQLQuery("EXPLAIN format = JSON "+query);
+        		List<String> executionPlanDetails = objSQLQuery.list();
+        		objMySQLQueryDetails.setQueryPlan(executionPlanDetails.get(0));
+        	}
+		}
 		return objMySQLQueryDetails;
 	}
 	
