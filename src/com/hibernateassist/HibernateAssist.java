@@ -283,6 +283,7 @@ public class HibernateAssist {
                     objMSSQLAnalyser.setDatabaseURL(getDatabaseURL());
                     objMSSQLAnalyser.setDatabaseUsername(getDatabaseUsername());
                     objMSSQLAnalyser.setDatabasePassword(getDatabasePassword());
+                    objMSSQLAnalyser.setHibernateSession(HibernateLocalSession);
                     logger.info("Hibernate Assist: If report is not generating please execute same Criteria 2-3 times.");
                     objMSSQLAnalyser.generateQueryReport(getCriteriaQuery(), getHTMLReportFolder());
                 }else if("org.hibernate.dialect.MySQLDialect".equalsIgnoreCase(dialect)
@@ -294,6 +295,8 @@ public class HibernateAssist {
                 	objMySQLAnalyser.setDatabaseUsername(getDatabaseUsername());
                 	objMySQLAnalyser.setDatabasePassword(getDatabasePassword());
                 	objMySQLAnalyser.setDatabaseVersion(getDatabaseVersion());
+                	objMySQLAnalyser.setHibernateSession(HibernateLocalSession);
+                	
                 	String valuedQuery = getValuedCriteriaQuery();
         			if(valuedQuery != null && !valuedQuery.isEmpty()){
         				objMySQLAnalyser.generateQueryReport(getCriteriaQuery(), valuedQuery, getHTMLReportFolder());
