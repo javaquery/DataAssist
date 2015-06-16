@@ -30,6 +30,7 @@ import org.hibernate.persister.entity.OuterJoinLoadable;
 import com.hibernateassist.basecode.CriteriaQueryValueTranslator;
 import com.hibernateassist.database.MSSQLAnalyser;
 import com.hibernateassist.database.MySQLAnalyser;
+import com.hibernateassist.database.PostgreSQLAnalyser;
 
 
 /**
@@ -300,6 +301,14 @@ public class HibernateAssist {
                 	String valuedQuery = getValuedCriteriaQuery();
         			if(valuedQuery != null && !valuedQuery.isEmpty()){
         				objMySQLAnalyser.generateQueryReport(getCriteriaQuery(), valuedQuery, getHTMLReportFolder());
+        			}
+                }else if("org.hibernate.dialect.PostgreSQLDialect".equalsIgnoreCase(dialect)){
+                	PostgreSQLAnalyser objPostgreSQLAnalyser = new PostgreSQLAnalyser();
+                	objPostgreSQLAnalyser.setHibernateSession(HibernateLocalSession);
+                	
+                	String valuedQuery = getValuedCriteriaQuery();
+        			if(valuedQuery != null && !valuedQuery.isEmpty()){
+        				objPostgreSQLAnalyser.generateQueryReport(getCriteriaQuery(), valuedQuery, getHTMLReportFolder());
         			}
                 }
             }
