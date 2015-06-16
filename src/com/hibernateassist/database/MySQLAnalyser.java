@@ -39,7 +39,6 @@ public class MySQLAnalyser extends AbstractDAO{
 	
 	/**
 	 * Generate Query report from Hibernate Criteria.
-     * <br/><br/>
 	 * @author vicky.thakor
 	 * @param hibernateQuery
 	 * @param actualQuery
@@ -318,9 +317,9 @@ public class MySQLAnalyser extends AbstractDAO{
 	                String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
 	                logger.info(informationMessage);
 	            } catch (FileNotFoundException ex) {
-	            	Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+	            	Logger.getLogger(MySQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
 	            } catch (UnsupportedEncodingException ex) {
-	            	Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+	            	Logger.getLogger(MySQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
 	            }
 			}else{
 				logger.info("Can't find your custom report folder");
@@ -338,9 +337,9 @@ public class MySQLAnalyser extends AbstractDAO{
 	                String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
 	                logger.info(informationMessage);
 	            } catch (FileNotFoundException ex) {
-	                Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+	                Logger.getLogger(MySQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
 	            } catch (UnsupportedEncodingException ex) {
-	                Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
+	                Logger.getLogger(MySQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
 	            }
 			}
 	 }
