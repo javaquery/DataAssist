@@ -4,14 +4,19 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
@@ -24,6 +29,7 @@ public class CommonUtil {
 		TopCenter, BottomCenter, LeftMiddle, RightMiddle, Center, TopRight, BottomRight, TopLeft, BottomLeft
 	}
 
+	private static final Logger logger = Logger.getLogger(CommonUtil.class.getName());
 	private static String alphabet = "G8abHcId1J23Kefg9L0MhOPijkQlRmnSopT45UVqrWsFXtuY6EZ7vwCxByzA";
 	
     /**
@@ -184,7 +190,7 @@ public class CommonUtil {
 	    			 +"<ul>"
 	    			 +"<li>Third party tool's rights reserved by their respective authors.</li>"
 	         		+ "<li>Files required to view this HTML report <b>1.)</b> combine_icon_hibernate_assist.png <b>2.)</b> jquery-1.8.2.min.js <b>3.)</b> jquery.jsPlumb-1.3.3-all.js</li>"
-	         		+ "<li><b>Microsoft SQL Server Report:</b> Icon Not Found, it represents that this particular operation not handled in HibernateAssist. Please report it on <a href=\"mailto:vicky.thakor@javaquery.com\" target=\"_blank\" class=\"externalLink\">vicky.thakor@javaquery.com</a> with Operation displayed under icon.</li>"
+	         		+ "<li><b>Note:</b> Icon Not Found, it represents that this particular operation not handled in HibernateAssist. Please report it on <a href=\"mailto:vicky.thakor@javaquery.com\" target=\"_blank\" class=\"externalLink\">vicky.thakor@javaquery.com</a> with Operation displayed under icon.</li>"
 	    			 +"</ul>"
 	    			 +"<br/>"
 	    			 +"<div style=\"text-align:center\">"
@@ -292,6 +298,56 @@ public class CommonUtil {
             token += tokenChar;
         }
         return token;
+    }
+    
+    /**
+     * Create HTML report from String.
+     * @author vicky.thakor
+     * @date 26th May, 2015
+     * @since 1.3
+     * @param HTMLContent
+     * @param Filename
+     * @param reportFolderPath
+     */
+    public void createHTMLReportFile(String HTMLContent, String Filename, String reportFolderPath){
+    	File reportFolder = new File(reportFolderPath);
+		if(reportFolder.exists()){
+			new CommonUtil().copyJavaScriptAndImageFile(reportFolderPath);
+			File createHTMLReport = new File(reportFolderPath + File.separatorChar + Filename + ".html");
+            if (createHTMLReport.exists()) {
+                createHTMLReport.delete();
+            }
+            try {
+                PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + Filename + ".html", "UTF-8");
+                writer.write(HTMLContent.toString());
+                writer.close();
+                String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
+                logger.info(informationMessage);
+            } catch (FileNotFoundException ex) {
+            	logger.log(Level.SEVERE, null, ex);
+            } catch (UnsupportedEncodingException ex) {
+            	logger.log(Level.SEVERE, null, ex);
+            }
+		}else{
+			logger.info("Can't find your custom report folder");
+            reportFolderPath = System.getProperty("user.home");
+            new CommonUtil().copyJavaScriptAndImageFile(reportFolderPath);
+            File createHTMLReport = new File(reportFolderPath + File.separatorChar + Filename + ".html");
+            if (createHTMLReport.exists()) {
+                createHTMLReport.delete();
+            }
+            try {
+                PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + Filename + ".html", "UTF-8");
+                writer.write(HTMLContent.toString());
+                writer.close();
+                String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
+                logger.info(informationMessage);
+            } catch (FileNotFoundException ex) {
+            	logger.log(Level.SEVERE, null, ex);
+            } catch (UnsupportedEncodingException ex) {
+            	logger.log(Level.SEVERE, null, ex);
+            }
+		}
     }
     
 	/**
