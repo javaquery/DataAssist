@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.BetweenExpression;
 import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.CriteriaQuery;
 import org.hibernate.criterion.Criterion;
@@ -53,6 +54,17 @@ public class CriteriaQueryValueTranslator {
 			String EntityName = objCriteriaImpl.getEntityOrClassName();
 			CriteriaQuery criteriaQuery = new CriteriaQueryTranslator((SessionFactoryImplementor) objSessionFactory, objCriteriaImpl, EntityName, "this_");
 
+			if(objCriteriaImpl.getMaxResults() != null){
+				String dialect = objHibernateAssist.getDialect();
+				if("org.hibernate.dialect.SQLServerDialect".equalsIgnoreCase(dialect))
+					query = query.replace("select", "select top " + objCriteriaImpl.getMaxResults());
+				else if("org.hibernate.dialect.MySQLDialect".equalsIgnoreCase(dialect)
+                		|| "org.hibernate.dialect.MySQLInnoDBDialect".equalsIgnoreCase(dialect)
+                		|| "org.hibernate.dialect.MySQLMyISAMDialect".equalsIgnoreCase(dialect)
+                		|| "org.hibernate.dialect.PostgreSQLDialect".equalsIgnoreCase(dialect))
+					query = query + " limit " + objCriteriaImpl.getMaxResults();
+			}
+			
 			/* Get all expression of Query(i.e `where` condition) */
 			Iterator iterator = objCriteriaImpl.iterateExpressionEntries();		
 			while(iterator.hasNext()){
@@ -157,6 +169,31 @@ public class CriteriaQueryValueTranslator {
 					}
 					strDisjunction = replaceSpecialChar(strDisjunction);
 					query = query.replaceFirst(strDisjunction, strDisjunctionImpl);
+				}else if(criterion instanceof BetweenExpression){
+					BetweenExpression betweenExpression = (BetweenExpression) criterion;
+					String strBetweenExpression = betweenExpression.toSqlString(criteria, criteriaQuery);
+					TypedValue[] typedValues = betweenExpression.getTypedValues(criteria, criteriaQuery);
+
+					String strDisjunctionImpl = strBetweenExpression;
+					for (int i = 0; i < typedValues.length; i++) {
+						if(typedValues[0].getType() instanceof StringType
+								|| typedValues[0].getType() instanceof CustomType){
+							String strValue = typedValues[0].getValue().toString();
+							strValue = strValue.replace("'", "''");
+							strDisjunctionImpl = strDisjunctionImpl.replace("?", "\'"+ strValue +"\'");
+						}else if(typedValues[0].getType() instanceof TimestampType){
+							java.util.Date javaDateFormat = (Date) typedValues[0].getValue(); 
+							java.sql.Timestamp sqlTimeStamp = new java.sql.Timestamp(javaDateFormat.getTime());
+							strDisjunctionImpl = strDisjunctionImpl.replace("?", "\'"+sqlTimeStamp+"\'");
+						}else if(typedValues[0].getType() instanceof BooleanType){
+							int convertedBoolean = (Boolean) typedValues[0].getValue() ? 1 : 0;
+							strDisjunctionImpl = strDisjunctionImpl.replace("?", String.valueOf(convertedBoolean));
+						}else{
+							strDisjunctionImpl = strDisjunctionImpl.replaceFirst("\\?", typedValues[i].getValue().toString());
+						}
+					}
+					strBetweenExpression = replaceSpecialChar(strBetweenExpression);
+					query = query.replaceFirst(strBetweenExpression, strDisjunctionImpl);
 				}
 			}
 		} catch (Exception ex) {
