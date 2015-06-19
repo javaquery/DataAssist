@@ -5,7 +5,7 @@
 Hibernate is one of the greatest creation but now developer don't care about query that actually matters. HibernateAssist helps Developers to understand What happened at database server. 
 
 #Features
-<table>
+<table >
 	<tr>
 		<td>✔ Analyse Hibernate Criteria</td>
 		<td>✔ Analyse Microsoft SQL Plan file(.sqlplan)</td>
@@ -33,11 +33,14 @@ Hibernate is one of the greatest creation but now developer don't care about que
 </table>
 
 #Database Support
-<table>
+<table style='width:100%'>
 	<tr>
 		<td>✔ Microsoft SQL Server</td>
 		<td>✔ MySQL (5.6 or above)</td>
-		<td>✔ PostgreSQL Developed (Available in next release)</td>
+	</tr>
+	<tr>
+		<td>✔ PostgreSQL Developed(Available in next release)</td>
+		<td>✔ Oracle(Under Development)</td>
 	</tr>
 </table>
 
