@@ -37,8 +37,12 @@ Hibernate is one of the greatest creation but now developer don't care about que
 	<tr>
 		<td>✔ Microsoft SQL Server</td>
 		<td>✔ MySQL (5.6 or above)</td>
+		<td>✔ PostgreSQL Developed (Available in next release)</td>
 	</tr>
 </table>
+
+#Configuration
+No configuration required to use Hibernate Assist
 
 #Online Sample Report
 Microsoft SQL Server: <a href="http://javaquery.github.io/HibernateAssist/" target="_blank">http://javaquery.github.io/HibernateAssist/</a><br/>
