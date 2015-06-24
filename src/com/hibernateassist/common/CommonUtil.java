@@ -212,8 +212,7 @@ public class CommonUtil {
 	
     /**
      * Use jsPlumb to connect two nodes with an Arrow.
-     * <br/><br/>
-     * @author 0Signals
+     * @author vicky.thakor
      * @param SourceNode
      * @param TargetNode
      * @return
@@ -239,7 +238,6 @@ public class CommonUtil {
     
     /**
      * Copy .js and .png file from jar to report folder.
-     * <br/><br/>
      * @author vicky.thakor
      * @param reportFolderPath
      */
@@ -348,6 +346,30 @@ public class CommonUtil {
             	logger.log(Level.SEVERE, null, ex);
             }
 		}
+    }
+    
+    /**
+     * Prepare table row from values.
+     * <pre>
+     * &lt;tr&gt; 
+     *    &lt;td&gt;value&lt;/td&gt;
+     *    &lt;td&gt;value&lt;/td&gt;
+     *    ...
+     * &lt;/tr&gt;
+     * </pre>
+     * @author vicky.thakor
+     * @date 23rd June, 2015
+     * @since 1.3
+     * @param values
+     * @return
+     */
+    public static String prepareTableRow(String... values){
+    	StringBuilder stringBuilderTableRow = new StringBuilder("<tr>");
+    	for(String value : values){
+    		stringBuilderTableRow.append("<td>" + value + "</td>");
+    	}
+    	stringBuilderTableRow.append("</tr>");
+    	return stringBuilderTableRow.toString();
     }
     
 	/**
