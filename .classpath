@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.14-bin.jar"/>
 	<classpathentry kind="lib" path="lib/json-rpc-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/postgresql-9.4- jdbc4.jar"/>
+	<classpathentry kind="lib" path="lib/ojdbc6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
