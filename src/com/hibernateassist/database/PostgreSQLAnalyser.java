@@ -14,8 +14,7 @@ import org.json.JSONObject;
 import com.hibernateassist.common.CommonUtil;
 import com.hibernateassist.common.CommonUtil.jsPlumbArrowPosition;
 
-
-public class PostgreSQLAnalyser extends AbstractDAO{
+public class PostgreSQLAnalyser extends AbstractDAO implements Analyser{
 	private static final Logger logger = Logger.getLogger(PostgreSQLAnalyser.class.getName());
 	private static Map<String, String> mapOperationAndImagePosition = new HashMap<String, String>();
 	
@@ -31,7 +30,17 @@ public class PostgreSQLAnalyser extends AbstractDAO{
 		mapOperationAndImagePosition.put("Result", "-632px -185px");
 	}
 	
-	public void generateQueryReport(String hibernateQuery, String actualQuery, String reportFolderPath){
+	/**
+	 * Generate Query report from Hibernate Criteria.
+	 * @author 0Signals
+	 * @date 21st June, 2015
+	 * @since 1.3
+	 * @param hibernateQuery
+	 * @param actualQuery
+	 * @param reportFolderPath
+	 */
+	@Override
+	public void generateQueryReport(String hibernateQuery, String actualQuery, String reportFolderPath, String strFilenamePrefix){
 		String strExecutionPlan = getExecutionPlan(actualQuery);
 		if(strExecutionPlan != null && !strExecutionPlan.isEmpty()){
 			try {
@@ -63,7 +72,7 @@ public class PostgreSQLAnalyser extends AbstractDAO{
                 stringBuilderHTMLReport.append("</div>");
                 stringBuilderHTMLReport.append("</div>");
 				stringBuilderHTMLReport.append(CommonUtil.getHTMLReportFooter());
-				new CommonUtil().createHTMLReportFile(stringBuilderHTMLReport.toString(), "HibernateAssist_PostgreSQL_" + CommonUtil.getRandomString(10), reportFolderPath);
+				new CommonUtil().createHTMLReportFile(stringBuilderHTMLReport.toString(), strFilenamePrefix, reportFolderPath);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
