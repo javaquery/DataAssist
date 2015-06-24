@@ -15,6 +15,8 @@ public enum SQLServerOperationImageEnum {
     Sort, NestedLoops, Merge, HashMatch, ClusteredIndexScan,
     ClusteredIndexSeek, IndexSeek, KeyLookup,
     DistributeStreams, RepartitionStreams, GatherStreams,
+    NonclusteredIndexScan,
+    
     
     Select, Update, Delete, TSQLIcon,
     
@@ -147,6 +149,8 @@ public enum SQLServerOperationImageEnum {
         	return "Warning";
         }else if(this == ParallelIcon){
         	return "Parallel";
+        }else if(this == NonclusteredIndexScan){
+        	return "Non Clustered Index Scan";
         }
         return "";
     }
@@ -216,6 +220,8 @@ public enum SQLServerOperationImageEnum {
         	return "-392px -56px";
         }else if(this == ParallelIcon){
         	return "-424px -56px";
+        }else if(this == NonclusteredIndexScan){
+        	return "-456px -56px";
         }
     	return "";
     }
