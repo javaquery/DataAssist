@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.sql.Clob;
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -27,44 +25,50 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.hibernateassist.bean.MSSQLQueryDetails;
 import com.hibernateassist.common.CommonUtil;
 import com.hibernateassist.common.CommonUtil.jsPlumbArrowPosition;
+import com.hibernateassist.pojo.MSSQLQueryDetails;
 
 /**
  * @author vicky.thakor
  */
-public class MSSQLAnalyser extends AbstractDAO{
+public class MSSQLAnalyser extends AbstractDAO implements Analyser{
+	
+	enum ExecutionPlanEnum {
+		AvgRowSize, EstimateCPU, EstimateIO, EstimateOperatorCost, EstimateRebinds,
+		EstimateRewinds, EstimateRows, LogicalOp, NodeId, Parallel,
+		PhysicalOp, EstimatedTotalSubtreeCost
+	}
 	
 	private static final Logger logger = Logger.getLogger(MSSQLAnalyser.class.getName());
 	private String QueryType;
 	private String QueryHash;
     private String StatementSubTreeCost;
-	
+    
     /**
      * Generate Query report from Hibernate Criteria.
-     * <br/><br/>
-     * @param query
+     * @param hibernateQuery
      * @param reportFolderPath
      * @throws ClassNotFoundException
      * @throws SQLException
      * @throws FileNotFoundException
      * @throws UnsupportedEncodingException
      */
-	public void generateQueryReport(String query, String reportFolderPath) throws ClassNotFoundException, SQLException, FileNotFoundException, UnsupportedEncodingException{
-		List<MSSQLQueryDetails> listMssqlQueryDetails = getExecutionPlan(query);
+    @Override
+	public void generateQueryReport(String hibernateQuery, String actualQuery, String reportFolderPath, String strFilenamePrefix) throws Exception{
+		List<MSSQLQueryDetails> listMssqlQueryDetails = getExecutionPlan(hibernateQuery);
 		if(listMssqlQueryDetails != null && !listMssqlQueryDetails.isEmpty()){
 			for (MSSQLQueryDetails mssqlQueryDetails : listMssqlQueryDetails) {
 				if(mssqlQueryDetails.getQueryPlan() != null && !mssqlQueryDetails.getQueryPlan().isEmpty()){
 
-					StringBuilder HTMLReport = new StringBuilder("");
-					HTMLReport.append(CommonUtil.getHTMLReportHeader());
-					HTMLReport.append(getExecutionPlanStatistics(mssqlQueryDetails.getExecutionCount(), mssqlQueryDetails.getLastExecutionTime(), mssqlQueryDetails.getLastElapsedTime(), mssqlQueryDetails.getLastLogicalReads(), mssqlQueryDetails.getLastLogicalWrites()));
-					HTMLReport.append(parseXML(getXMLDocument(mssqlQueryDetails.getQueryPlan(), null)));
-					HTMLReport.append(CommonUtil.getHTMLReportFooter());
+					StringBuilder stringBuilderHTMLReport = new StringBuilder("");
+					stringBuilderHTMLReport.append(CommonUtil.getHTMLReportHeader());
+					stringBuilderHTMLReport.append(getExecutionPlanStatistics(mssqlQueryDetails.getExecutionCount(), mssqlQueryDetails.getLastExecutionTime(), mssqlQueryDetails.getLastElapsedTime(), mssqlQueryDetails.getLastLogicalReads(), mssqlQueryDetails.getLastLogicalWrites()));
+					stringBuilderHTMLReport.append(parseXML(getXMLDocument(mssqlQueryDetails.getQueryPlan(), null)));
+					stringBuilderHTMLReport.append(CommonUtil.getHTMLReportFooter());
 					
 					reportFolderPath = reportFolderPath == null ? "" : reportFolderPath;
-					createHTMLReportFile(HTMLReport.toString(), reportFolderPath);
+					new CommonUtil().createHTMLReportFile(stringBuilderHTMLReport.toString(), strFilenamePrefix, reportFolderPath);
 				}
 			}
 		}else{
@@ -74,24 +78,22 @@ public class MSSQLAnalyser extends AbstractDAO{
 	
 	/**
 	 * Generate HTML Report from Microsoft SQL file.
-	 * <br/><br/>
 	 * @author vicky.thakor
 	 * @param sqlPlanXMLFile
 	 * @param reportFolderPath
 	 */
-	public void generateQueryReportFromFile(String sqlPlanXMLFile, String reportFolderPath){
-		StringBuilder HTMLReport = new StringBuilder("");
-		HTMLReport.append(CommonUtil.getHTMLReportHeader());
-		HTMLReport.append(parseXML(getXMLDocument(null, sqlPlanXMLFile)));
-		HTMLReport.append(CommonUtil.getHTMLReportFooter());
+	public void generateQueryReportFromFile(String sqlPlanXMLFile, String reportFolderPath, String strFilenamePrefix){
+		StringBuilder stringBuilderHTMLReport = new StringBuilder("");
+		stringBuilderHTMLReport.append(CommonUtil.getHTMLReportHeader());
+		stringBuilderHTMLReport.append(parseXML(getXMLDocument(null, sqlPlanXMLFile)));
+		stringBuilderHTMLReport.append(CommonUtil.getHTMLReportFooter());
 		
 		reportFolderPath = reportFolderPath == null ? "" : reportFolderPath;
-		createHTMLReportFile(HTMLReport.toString(), reportFolderPath);
+		new CommonUtil().createHTMLReportFile(stringBuilderHTMLReport.toString(), strFilenamePrefix + "_" + CommonUtil.getRandomString(5), reportFolderPath);
 	}
 	
 	/**
 	 * Get execution plans from database
-	 * <br/><br/>
 	 * @author vicky.thakor
 	 * @param query
 	 * @return {@link MSSQLQueryDetails}
@@ -170,7 +172,6 @@ public class MSSQLAnalyser extends AbstractDAO{
 	
 	/**
 	 * Get XML Document instance from String or File
-	 * <br/><br/>
 	 * @author vicky.thakor
 	 * @param fromString
 	 * @param fromFile
@@ -193,7 +194,6 @@ public class MSSQLAnalyser extends AbstractDAO{
 	                	objDocument = objDocumentBuilder.parse(xmlFile);
 	                }
 	            }
-				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -203,7 +203,6 @@ public class MSSQLAnalyser extends AbstractDAO{
 	
 	/**
 	 * Parse Execution Plan XML and get HTML Report.
-	 * <br/><br/>
 	 * @author vicky.thakor
 	 * @param objDocument
 	 */
@@ -244,7 +243,6 @@ public class MSSQLAnalyser extends AbstractDAO{
 	            	stringBuilderHTMLReport.append("</div>");
 	            	stringBuilderHTMLReport.append("</div>");
                 }
-	            
 			}else{
 				logger.info("Not a valid XML document.");
 			}
@@ -256,12 +254,11 @@ public class MSSQLAnalyser extends AbstractDAO{
 	
 	/**
 	 * Get basic details of query like Estimated Rows, QueryHash, etc...
-	 * <br/><br/>
 	 * @author vicky.thakor
 	 * @param listQueryStatement
-	 * @param stringBuilder
+	 * @param stringBuilderHTMLReport
 	 */
-	private void getQueryProperties(NodeList listQueryStatement, StringBuilder stringBuilder) {
+	private void getQueryProperties(NodeList listQueryStatement, StringBuilder stringBuilderHTMLReport) {
         if (listQueryStatement != null) {
             if (listQueryStatement.item(0) != null) {
                 if (listQueryStatement.item(0).getNodeType() == Node.ELEMENT_NODE) {
@@ -269,85 +266,34 @@ public class MSSQLAnalyser extends AbstractDAO{
                     NamedNodeMap queryAttributes = elementQueryStatement.getAttributes();
 
                     if (queryAttributes.getNamedItem("StatementText") != null) {
-                    	stringBuilder.append("<div class=\"statistics_data\">");
-                        stringBuilder.append("<div class=\"operation_header\"><h3>Query Statistics</h3>");
-                        stringBuilder.append("Data shows actual query generated by Hibernate, Estimated Rows and other query properties. In case of report generated from .sqlplan file then all data taken from .sqlplan file.");
-                		stringBuilder.append("</div>");
-                        stringBuilder.append("<div class=\"whiteFadedbox\">");
-                        stringBuilder.append("<table class=\"stylistTable\" style=\"width:100%\"><thead><tr>");
-                        stringBuilder.append("<td>Query Type</td>");
-                        stringBuilder.append("<td>Estimated Rows</td>");
-                        stringBuilder.append("<td>Sub Tree Cost</td>");
-                        stringBuilder.append("<td>Optimization Level</td>");
-                        stringBuilder.append("<td>Early Abort Reason</td>");
-                        stringBuilder.append("<td>QueryHash</td>");
-                        stringBuilder.append("<td>QueryPlanHash</td>");
-                        stringBuilder.append("</tr></thead>");
-                        stringBuilder.append("<tbody><tr>");
-                        if (queryAttributes.getNamedItem("StatementType") != null) {
-                            stringBuilder.append("<td>");
-                            stringBuilder.append(queryAttributes.getNamedItem("StatementType").getNodeValue());
-                            stringBuilder.append("</td>");
-                            setQueryType(queryAttributes.getNamedItem("StatementType").getNodeValue());
-                        } else {
-                            stringBuilder.append("<td>NA</td>");
-                        }
-
-                        if (queryAttributes.getNamedItem("StatementEstRows") != null) {
-                            stringBuilder.append("<td>");
-                            stringBuilder.append(queryAttributes.getNamedItem("StatementEstRows").getNodeValue());
-                            stringBuilder.append("</td>");
-                        } else {
-                            stringBuilder.append("<td>NA</td>");
-                        }
-                        if (queryAttributes.getNamedItem("StatementSubTreeCost") != null) {
-                            stringBuilder.append("<td>");
-                            stringBuilder.append(queryAttributes.getNamedItem("StatementSubTreeCost").getNodeValue());
-                            stringBuilder.append("</td>");
-                            setStatementSubTreeCost(queryAttributes.getNamedItem("StatementSubTreeCost").getNodeValue());
-                        } else {
-                            stringBuilder.append("<td>NA</td>");
-                        }
-
-                        if (queryAttributes.getNamedItem("StatementOptmLevel") != null) {
-                            stringBuilder.append("<td>");
-                            stringBuilder.append(queryAttributes.getNamedItem("StatementOptmLevel").getNodeValue());
-                            stringBuilder.append("</td>");
-                        } else {
-                            stringBuilder.append("<td>NA</td>");
-                        }
-
-                        if (queryAttributes.getNamedItem("StatementOptmEarlyAbortReason") != null) {
-                            stringBuilder.append("<td>");
-                            stringBuilder.append(queryAttributes.getNamedItem("StatementOptmEarlyAbortReason").getNodeValue());
-                            stringBuilder.append("</td>");
-                        } else {
-                            stringBuilder.append("<td>NA</td>");
-                        }
-
-                        if (queryAttributes.getNamedItem("QueryHash") != null) {
-                            stringBuilder.append("<td>");
-                            stringBuilder.append(queryAttributes.getNamedItem("QueryHash").getNodeValue());
-                            stringBuilder.append("</td>");
-                            setQueryHash(queryAttributes.getNamedItem("QueryHash").getNodeValue());
-                        } else {
-                            stringBuilder.append("<td>NA</td>");
-                        }
-
-                        if (queryAttributes.getNamedItem("QueryPlanHash") != null) {
-                            stringBuilder.append("<td>");
-                            stringBuilder.append(queryAttributes.getNamedItem("QueryPlanHash").getNodeValue());
-                            stringBuilder.append("</td>");
-                        } else {
-                            stringBuilder.append("<td>NA</td>");
-                        }
-
-                        stringBuilder.append("</tr></tbody></table><br/>");
-                        stringBuilder.append("<div style=\"overflow:scroll;height:100px;font-size:15px\">");
-                        stringBuilder.append(queryAttributes.getNamedItem("StatementText").getNodeValue());
-                        stringBuilder.append("</div>");
-                        stringBuilder.append("</div>");
-                        stringBuilder.append("</div>");
+                    	String strStatementType = queryAttributes.getNamedItem("StatementType") != null ? queryAttributes.getNamedItem("StatementType").getNodeValue() : "NA";
+                        String strStatementEstRows = queryAttributes.getNamedItem("StatementEstRows") != null ? queryAttributes.getNamedItem("StatementEstRows").getNodeValue() : "NA";
+                        String strStatementSubTreeCost = queryAttributes.getNamedItem("StatementSubTreeCost") != null ? queryAttributes.getNamedItem("StatementSubTreeCost").getNodeValue() : "NA";
+                        String strStatementOptmLevel = queryAttributes.getNamedItem("StatementOptmLevel") != null ? queryAttributes.getNamedItem("StatementOptmLevel").getNodeValue() : "NA";
+                        String strStatementOptmEarlyAbortReason = queryAttributes.getNamedItem("StatementOptmEarlyAbortReason") != null ? queryAttributes.getNamedItem("StatementOptmEarlyAbortReason").getNodeValue() : "NA";
+                        String strQueryHash = queryAttributes.getNamedItem("QueryHash") != null ? queryAttributes.getNamedItem("QueryHash").getNodeValue() : "NA";
+                        String strQueryPlanHash = queryAttributes.getNamedItem("QueryPlanHash") != null ? queryAttributes.getNamedItem("QueryPlanHash").getNodeValue() : "NA";
+                    	
+                    	stringBuilderHTMLReport.append("<div class=\"statistics_data\">");
+                        stringBuilderHTMLReport.append("<div class=\"operation_header\"><h3>Query Statistics</h3>");
+                        stringBuilderHTMLReport.append("Data shows actual query generated by Hibernate, Estimated Rows and other query properties. In case of report generated from .sqlplan file then all data taken from .sqlplan file.");
+                		stringBuilderHTMLReport.append("</div>");
+                        stringBuilderHTMLReport.append("<div class=\"whiteFadedbox\">");
+                        stringBuilderHTMLReport.append("<table class=\"stylistTable\" style=\"width:100%\"><thead>");
+                        stringBuilderHTMLReport.append(CommonUtil.prepareTableRow("Query Type", "Estimated Rows", "Sub Tree Cost", "Optimization Level", "Early Abort Reason", "QueryHash", "QueryPlanHash"));                        
+                        stringBuilderHTMLReport.append("</thead>");
+                        stringBuilderHTMLReport.append("<tbody>");
+                        stringBuilderHTMLReport.append(CommonUtil.prepareTableRow(strStatementType, strStatementEstRows, strStatementSubTreeCost, strStatementOptmLevel, strStatementOptmEarlyAbortReason, strQueryHash, strQueryPlanHash));
+                        stringBuilderHTMLReport.append("</tbody></table><br/>");
+                        stringBuilderHTMLReport.append("<div style=\"overflow:scroll;height:100px;font-size:15px\">");
+                        stringBuilderHTMLReport.append(queryAttributes.getNamedItem("StatementText").getNodeValue());
+                        stringBuilderHTMLReport.append("</div>");
+                        stringBuilderHTMLReport.append("</div>");
+                        stringBuilderHTMLReport.append("</div>");
+                        
+                        setQueryType(strStatementType);
+                        setStatementSubTreeCost(strStatementSubTreeCost);
+                        setQueryHash(strQueryHash);
                     }
                 }
             }
@@ -356,7 +302,6 @@ public class MSSQLAnalyser extends AbstractDAO{
 	
 	/**
 	 * Get root node operation image (i.e: SELECT, UPDATE, DELETE)
-	 * <br/><br/>
 	 * @author vicky.thakor
 	 * @return
 	 */
@@ -377,36 +322,34 @@ public class MSSQLAnalyser extends AbstractDAO{
 	
 	/**
 	 * Parse all XML node by recursive method call
-	 * <br/><br/>
 	 * @author vicky.thakor 
 	 * @param nodeList
 	 * @param parentNode
-	 * @param stringBuilder
+	 * @param stringBuilderHTMLReport
 	 */
-    private void recursiveXMLParse(NodeList nodeList, int parentNode, StringBuilder stringBuilder) {
+    private void recursiveXMLParse(NodeList nodeList, int parentNode, StringBuilder stringBuilderHTMLReport) {
         int nodeLength = nodeList.getLength();
         for (int i = 0; i < nodeLength; i++) {
             if (nodeList.item(i).hasChildNodes()) {
                 Element element = (Element) nodeList.item(i);
                 if ("RelOp".equals(element.getTagName())) {
-                    parentNode = generateChildDetails(nodeList.item(i), nodeList, parentNode, stringBuilder);
+                    parentNode = generateChildDetails(nodeList.item(i), nodeList, parentNode, stringBuilderHTMLReport);
                 }
-                recursiveXMLParse(nodeList.item(i).getChildNodes(), parentNode, stringBuilder);
+                recursiveXMLParse(nodeList.item(i).getChildNodes(), parentNode, stringBuilderHTMLReport);
             }
         }
     }
 	
     /**
-     * Get child node details
-     * <br/><br/>
+     * Get child node details.
      * @author vicky.thakor
      * @param parentNode
      * @param childNodes
      * @param parentNodeID
-     * @param sb
+     * @param stringBuilderHTMLReport
      * @return
      */
-    private int generateChildDetails(Node parentNode, NodeList childNodes, int parentNodeID, StringBuilder sb) {
+    private int generateChildDetails(Node parentNode, NodeList childNodes, int parentNodeID, StringBuilder stringBuilderHTMLReport) {
     	try {
     		int oldParentID = parentNodeID;
             Element elementParent = (Element) parentNode;
@@ -455,23 +398,22 @@ public class MSSQLAnalyser extends AbstractDAO{
                                 }
 
                                 if (!operationType.isEmpty()) {
-                                    sb.append("$(\"#parent").append(oldParentID).append("\")");
-                                    sb.append(".append(\"<div id=\\\"parent").append(childNodeID).append("\\\"");
-                                    sb.append(" style=\\\"padding-left:95px;padding-bottom:20px;display: inline-block;\\\">");
-                                    sb.append(getElementImage(operationType, mapNodeProperty, childNodeID));
-                                    sb.append("</div><br/>\");\n");
+                                    stringBuilderHTMLReport.append("$(\"#parent").append(oldParentID).append("\")");
+                                    stringBuilderHTMLReport.append(".append(\"<div id=\\\"parent").append(childNodeID).append("\\\"");
+                                    stringBuilderHTMLReport.append(" style=\\\"padding-left:95px;padding-bottom:20px;display: inline-block;\\\">");
+                                    stringBuilderHTMLReport.append(getElementImage(operationType, mapNodeProperty, childNodeID));
+                                    stringBuilderHTMLReport.append("</div><br/>\");\n");
                                     
                                     /* Set Source and Target node for jsPlumb */
                                     String sourceNode = "parentTable"+childNodeID;
                                     String targetNode = oldParentID == -1 ? "rootnode" : "parentTable"+oldParentID; 
-                                    sb.append(CommonUtil.getjsPlumbScript(sourceNode, targetNode, jsPlumbArrowPosition.LeftMiddle, jsPlumbArrowPosition.RightMiddle));
+                                    stringBuilderHTMLReport.append(CommonUtil.getjsPlumbScript(sourceNode, targetNode, jsPlumbArrowPosition.LeftMiddle, jsPlumbArrowPosition.RightMiddle));
                                 }
                             }
                         }
                     }
                 }
             }
-            
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -480,7 +422,6 @@ public class MSSQLAnalyser extends AbstractDAO{
     
     /**
      * Return attributes of current node. i.e: PhysicalOp, LogicalOp, EstimateCPU, etc...
-     * <br/><br/>
      * @author vicky.thakor
      * @param nodeAttributes
      * @return {@link Map<String, String>}
@@ -567,7 +508,6 @@ public class MSSQLAnalyser extends AbstractDAO{
     
     /**
      * Get column specific operation details.
-     * <br/><br/> 
      * @author vicky.thakor
      * @param operationType
      * @param elementRelOp
@@ -682,7 +622,8 @@ public class MSSQLAnalyser extends AbstractDAO{
         		}
         	}
         }else if("Clustered Index Scan".equalsIgnoreCase(operationType)
-        		|| "RID Lookup".equalsIgnoreCase(operationType)){
+        		|| "RID Lookup".equalsIgnoreCase(operationType)
+        		|| "Index Scan".equalsIgnoreCase(operationType)){
         	if(elementRelOp.getElementsByTagName("IndexScan") != null){
         		Element elementIndexScan = (Element) elementRelOp.getElementsByTagName("IndexScan").item(0);
         		
@@ -808,7 +749,6 @@ public class MSSQLAnalyser extends AbstractDAO{
     
     /**
      * Get all attributes of node.
-     * <br/><br/>
      * @author vicky.thakor
      * @param namedNodeMap
      * @param mapOperationProperty
@@ -833,7 +773,6 @@ public class MSSQLAnalyser extends AbstractDAO{
     
     /**
      * Get HTML content for node image.
-     * <br/><br/>
      * @param tagName
      * @param mapNodeProperty
      * @return
@@ -1000,6 +939,9 @@ public class MSSQLAnalyser extends AbstractDAO{
         }else if("Key Lookup:Clustered".equalsIgnoreCase(tagName)){
         	nodeName += "Key Lookup (Clustered)";
         	returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.KeyLookup.getImagePosition(), SQLServerOperationImageEnum.KeyLookup.getTitle(), nodeAttribute.toString(), nodeName, EstimateOperatorCost, parentID, strNotifyIcon);
+        }else if("Index Scan:Index Scan".equalsIgnoreCase(tagName)){
+        	nodeName += "Index Scan (NonClustered)";
+        	returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.NonclusteredIndexScan.getImagePosition(), SQLServerOperationImageEnum.NonclusteredIndexScan.getTitle(), nodeAttribute.toString(), nodeName, EstimateOperatorCost, parentID, strNotifyIcon);        	
         }else{
         	nodeName += tagName; 
         	returnNode = getHTMLNodeImage(SQLServerOperationImageEnum.IconNotFound.getImagePosition(), tagName, nodeAttribute.toString(), nodeName, EstimateOperatorCost, parentID, strNotifyIcon);
@@ -1009,7 +951,6 @@ public class MSSQLAnalyser extends AbstractDAO{
     
     /**
      * Create HTML content for node image.
-     * <br/><br/>
      * @author vicky.thakor
      * @param imageSrc
      * @param imageTitle
@@ -1046,7 +987,6 @@ public class MSSQLAnalyser extends AbstractDAO{
     
     /**
      * Get Execution Plan Statistics.
-     * <br/><br/>
      * @author vicky.thakor
      * @param executionCount
      * @param lastExecutionTime
@@ -1062,30 +1002,15 @@ public class MSSQLAnalyser extends AbstractDAO{
         stringBuilder.append("Data shows total hit of same query on database by different or same user. It also shows time and type of operation performed by query.");
         stringBuilder.append("</div>");
         stringBuilder.append("<div class=\"whiteFadedbox\">");
-        stringBuilder.append("<table class=\"stylistTable\" style=\"width:100%\"><thead><tr>");
-        stringBuilder.append("<td>Execution Count</td>");
-        stringBuilder.append("<td>Last Execution Time</td>");
-        stringBuilder.append("<td>Last Elapsed Time</td>");
-        stringBuilder.append("<td>Last Logical Reads</td>");
-        stringBuilder.append("<td>Last Logical Writes</td>");
-        stringBuilder.append("</tr></thead>");
-        stringBuilder.append("<tbody><tr>");
-        stringBuilder.append("<td>");
-        stringBuilder.append(executionCount);
-        stringBuilder.append("</td>");
-        stringBuilder.append("<td>");
-        stringBuilder.append(lastExecutionTime);
-        stringBuilder.append("</td>");
-        stringBuilder.append("<td>");
-        stringBuilder.append(lastElapsedTime);
-        stringBuilder.append("</td>");
-        stringBuilder.append("<td>");
-        stringBuilder.append(lastLogicalReads);
-        stringBuilder.append("</td>");
-        stringBuilder.append("<td>");
-        stringBuilder.append(lastLogicalWrites);
-        stringBuilder.append("</td>");
-        stringBuilder.append("</tr></tbody></table>");
+        stringBuilder.append("<table class=\"stylistTable\" style=\"width:100%\">");
+        stringBuilder.append("<thead>");
+        stringBuilder.append(CommonUtil.prepareTableRow("Execution Count", "Last Execution Time", "Last Elapsed Time", "Last Logical Reads", "Last Logical Writes"));
+        stringBuilder.append("</thead>");
+        stringBuilder.append("<tbody>");
+        stringBuilder.append(CommonUtil.prepareTableRow(String.valueOf(executionCount), String.valueOf(lastExecutionTime), String.valueOf(lastElapsedTime),
+        																						String.valueOf(lastLogicalReads), String.valueOf(lastLogicalWrites)));
+        stringBuilder.append("</tbody>");
+        stringBuilder.append("</table>");
         stringBuilder.append("</div>");
         stringBuilder.append("</div>");
         return stringBuilder.toString();
@@ -1099,12 +1024,11 @@ public class MSSQLAnalyser extends AbstractDAO{
      * @param stringBuilder
      */
     private void ScanMissingIndexes(NodeList nodeListMissingIndex, StringBuilder stringBuilder) {
-        String databaseName = "", schemaName = "", tableName = "", baseColumn = "", includeColumn = "", impact = "";
-
         if (nodeListMissingIndex != null) {
             int nodeLength = nodeListMissingIndex.getLength();
             if (nodeLength > 0) {
                 for (int i = 0; i < nodeLength; i++) {
+                	String databaseName = "", schemaName = "", tableName = "", baseColumn = "", includeColumn = "", impact = "";
                     if (nodeListMissingIndex.item(i).getNodeType() == Node.ELEMENT_NODE) {
                         Element MissingIndexGroupNode = (Element) nodeListMissingIndex.item(i);
                         if (MissingIndexGroupNode != null && "MissingIndexGroup".equalsIgnoreCase(MissingIndexGroupNode.getNodeName())) {
@@ -1186,59 +1110,11 @@ public class MSSQLAnalyser extends AbstractDAO{
                         if (includeColumn != null && !includeColumn.isEmpty()) {
                             stringBuilder.append(" INCLUDE (").append(includeColumn).append(")");
                         }
-                        stringBuilder.append(";");
+                        stringBuilder.append(";<br/>");
                     }
-
                 }
             }
         }
-    }
-    
-    /**
-     * Create HTML file.
-     * <br/><br/>
-     * @author vicky.thakor
-     * @param HTMLContent
-     */
-    private void createHTMLReportFile(String HTMLContent, String reportFolderPath){
-    	File reportFolder = new File(reportFolderPath);
-		if(reportFolder.exists()){
-			new CommonUtil().copyJavaScriptAndImageFile(reportFolderPath);
-			File createHTMLReport = new File(reportFolderPath + File.separatorChar + "HibernateAssist_MSSQL_" + getQueryHash() + ".html");
-            if (createHTMLReport.exists()) {
-                createHTMLReport.delete();
-            }
-            try {
-                PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "HibernateAssist_MSSQL_" + getQueryHash() + ".html", "UTF-8");
-                writer.write(HTMLContent.toString());
-                writer.close();
-                String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
-                logger.info(informationMessage);
-            } catch (FileNotFoundException ex) {
-            	Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (UnsupportedEncodingException ex) {
-            	Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-            }
-		}else{
-			logger.info("Can't find your custom report folder");
-            reportFolderPath = System.getProperty("user.home");
-            new CommonUtil().copyJavaScriptAndImageFile(reportFolderPath);
-            File createHTMLReport = new File(reportFolderPath + File.separatorChar + "HibernateAssist_MSSQL_" + getQueryHash() + ".html");
-            if (createHTMLReport.exists()) {
-                createHTMLReport.delete();
-            }
-            try {
-                PrintWriter writer = new PrintWriter(reportFolderPath + File.separatorChar + "HibernateAssist_MSSQL_" + getQueryHash() + ".html", "UTF-8");
-                writer.write(HTMLContent.toString());
-                writer.close();
-                String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
-                logger.info(informationMessage);
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(MSSQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-            }
-		}
     }
     
 	public static void main(String[] args) {
