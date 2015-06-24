@@ -1,29 +1,22 @@
 package com.hibernateassist.database;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.SQLQuery;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.hibernateassist.bean.MySQLQueryDetails;
 import com.hibernateassist.common.CommonUtil;
 import com.hibernateassist.common.CommonUtil.jsPlumbArrowPosition;
-
 
 /**
  * @author vicky.thakor
  */
-public class MySQLAnalyser extends AbstractDAO{
+public class MySQLAnalyser extends AbstractDAO implements Analyser{
 	
 	enum MySQLOperation{
 		ordering_operation, grouping_operation, nested_loop, table;
@@ -46,11 +39,12 @@ public class MySQLAnalyser extends AbstractDAO{
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	public void generateQueryReport(String hibernateQuery, String actualQuery, String reportFolderPath) throws ClassNotFoundException, SQLException {
-		MySQLQueryDetails objMySQLQueryDetails = getExecutionPlan(actualQuery);
-		if(objMySQLQueryDetails != null && objMySQLQueryDetails.getQueryPlan() != null){
+	@Override
+	public void generateQueryReport(String hibernateQuery, String actualQuery, String reportFolderPath, String strFilenamePrefix) throws ClassNotFoundException, SQLException {
+		String strExecutionPlan = getExecutionPlan(actualQuery);
+		if(strExecutionPlan != null && !strExecutionPlan.isEmpty()){
 				try {
-					JSONObject QueryPlan = new JSONObject(objMySQLQueryDetails.getQueryPlan());
+					JSONObject QueryPlan = new JSONObject(strExecutionPlan);
 					
 					StringBuilder HTMLReport = new StringBuilder("");
 					HTMLReport.append(CommonUtil.getHTMLReportHeader());
@@ -85,8 +79,7 @@ public class MySQLAnalyser extends AbstractDAO{
 					HTMLReport.append(CommonUtil.getHTMLReportFooter());
 					
 					reportFolderPath = reportFolderPath == null ? "" : reportFolderPath;
-					createHTMLReportFile(HTMLReport.toString(), reportFolderPath);
-					
+					new CommonUtil().createHTMLReportFile(HTMLReport.toString(), strFilenamePrefix, reportFolderPath);
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
@@ -96,15 +89,15 @@ public class MySQLAnalyser extends AbstractDAO{
 	}
 	
 	/**
-	 * Get Execution Plan JSON from MySQL.<br/><br/>
+	 * Get Execution Plan JSON from MySQL.
 	 * @author vicky.thakor
 	 * @param query
 	 * @return
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	private MySQLQueryDetails getExecutionPlan(String query) throws ClassNotFoundException, SQLException{
-		MySQLQueryDetails objMySQLQueryDetails = new MySQLQueryDetails();
+	private String getExecutionPlan(String query) throws ClassNotFoundException, SQLException{
+		String strExecutionPlan =  null;
 		if(query == null || query.isEmpty()){
 			logger.info("Please provide valid query");
 		}else if(getHibernateSession() != null){
@@ -117,14 +110,14 @@ public class MySQLAnalyser extends AbstractDAO{
         	if(doubleVersion >= 5.6){
         		SQLQuery objSQLQuery = getHibernateSession().createSQLQuery("EXPLAIN format = JSON "+query);
         		List<String> executionPlanDetails = objSQLQuery.list();
-        		objMySQLQueryDetails.setQueryPlan(executionPlanDetails.get(0));
+        		strExecutionPlan = executionPlanDetails.get(0);
         	}
 		}
-		return objMySQLQueryDetails;
+		return strExecutionPlan;
 	}
 	
 	/**
-	 * Recursive method call to parse all MySQL operation.<br/><br/>
+	 * Recursive method call to parse all MySQL operation.
 	 * @author vicky.thakor
 	 * @param obj
 	 * @param parentNode
@@ -152,7 +145,7 @@ public class MySQLAnalyser extends AbstractDAO{
 			}else if(obj.has(MySQLOperation.grouping_operation.toString())){
 				JSONObject jsonObjectGroupingOperation = obj.getJSONObject(MySQLOperation.grouping_operation.toString());
 				parentNode = parseJSON(jsonObjectGroupingOperation, parentNode, stringBuilderHTMLReport);
-				parentNode = parentNode + 1;
+				
 				
 				StringBuilder nodeAttribute = new StringBuilder("");
 				Iterator<String> iteratorProperties = jsonObjectGroupingOperation.keys();
@@ -168,13 +161,18 @@ public class MySQLAnalyser extends AbstractDAO{
 				}
 				
 				stringBuilderHTMLReport.append("<script>");
+				if(parentNode == 0){
+					/* In case of single table return */
+					stringBuilderHTMLReport.append(CommonUtil.getjsPlumbScript("parent0", "parent1", jsPlumbArrowPosition.TopCenter, jsPlumbArrowPosition.BottomCenter));
+				}
+				parentNode = parentNode + 1;
+				
 				stringBuilderHTMLReport.append("$(\"#tableBlock").append(parentNode-1).append("\").prepend(\"<div id=\\\"tableBlock").append(parentNode).append("\\\"><div class=\\\"groupByMySQL nodeImage\\\" id=\\\"parent").append((parentNode)).append("\\\" ").append(nodeAttribute).append(">GROUP</div></div>\");");
 				stringBuilderHTMLReport.append(CommonUtil.getjsPlumbScript("parent"+parentNode, "parent"+(parentNode+1), jsPlumbArrowPosition.TopCenter, jsPlumbArrowPosition.BottomCenter));
 				stringBuilderHTMLReport.append("</script>");
 			}else if(obj.has(MySQLOperation.ordering_operation.toString())){
 				JSONObject jsonObjectOrderingOperation = obj.getJSONObject(MySQLOperation.ordering_operation.toString());
 				parentNode = parseJSON(jsonObjectOrderingOperation, parentNode, stringBuilderHTMLReport);
-				parentNode = parentNode + 1;
 				
 				StringBuilder nodeAttribute = new StringBuilder("");
 				Iterator<String> iteratorProperties = jsonObjectOrderingOperation.keys();
@@ -191,6 +189,11 @@ public class MySQLAnalyser extends AbstractDAO{
 				}
 				
 				stringBuilderHTMLReport.append("<script>");
+				if(parentNode == 0){
+					/* In case of single table return */
+					stringBuilderHTMLReport.append(CommonUtil.getjsPlumbScript("parent0", "parent1", jsPlumbArrowPosition.TopCenter, jsPlumbArrowPosition.BottomCenter));
+				}
+				parentNode = parentNode + 1;
 				stringBuilderHTMLReport.append("$(\"#tableBlock").append(parentNode-1).append("\").prepend(\"<div id=\\\"tableBlock").append(parentNode).append("\\\"><div class=\\\"orderByMySQL nodeImage\\\" id=\\\"parent").append((parentNode)).append("\\\" ").append(nodeAttribute).append(">ORDER</div></div>\");");
 				stringBuilderHTMLReport.append(CommonUtil.getjsPlumbScript("parent"+parentNode, "parent"+(parentNode+1), jsPlumbArrowPosition.TopCenter, jsPlumbArrowPosition.BottomCenter));
 				stringBuilderHTMLReport.append("</script>");
@@ -200,7 +203,7 @@ public class MySQLAnalyser extends AbstractDAO{
 	}
 	
 	/**
-	 * Get table node.<br/><br/>
+	 * Get table node.
 	 * @author vicky.thakor
 	 * @param objTableNode
 	 * @param parentNode
@@ -294,53 +297,4 @@ public class MySQLAnalyser extends AbstractDAO{
 			stringBuilder.append("</div>");
 		}
 	}
-	
-	/**
-     * Create HTML file.
-     * <br/><br/>
-     * @author vicky.thakor
-     * @param HTMLContent
-     */
-	 private void createHTMLReportFile(String HTMLContent, String reportFolderPath){
-		 File reportFolder = new File(reportFolderPath);
-			if(reportFolder.exists()){
-				new CommonUtil().copyJavaScriptAndImageFile(reportFolderPath);
-				String filePath = reportFolderPath + File.separatorChar + "HibernateAssist_MySQL_" + CommonUtil.getRandomString(10) + ".html";
-				File createHTMLReport = new File(filePath);
-	            if (createHTMLReport.exists()) {
-	                createHTMLReport.delete();
-	            }
-	            try {
-	                PrintWriter writer = new PrintWriter(filePath, "UTF-8");
-	                writer.write(HTMLContent.toString());
-	                writer.close();
-	                String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
-	                logger.info(informationMessage);
-	            } catch (FileNotFoundException ex) {
-	            	Logger.getLogger(MySQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-	            } catch (UnsupportedEncodingException ex) {
-	            	Logger.getLogger(MySQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-	            }
-			}else{
-				logger.info("Can't find your custom report folder");
-	            reportFolderPath = System.getProperty("user.home");
-	            new CommonUtil().copyJavaScriptAndImageFile(reportFolderPath);
-	            String filePath = reportFolderPath + File.separatorChar + "HibernateAssist_MySQL_" + CommonUtil.getRandomString(10) + ".html";
-	            File createHTMLReport = new File(filePath);
-	            if (createHTMLReport.exists()) {
-	                createHTMLReport.delete();
-	            }
-	            try {
-	                PrintWriter writer = new PrintWriter(filePath, "UTF-8");
-	                writer.write(HTMLContent.toString());
-	                writer.close();
-	                String informationMessage = "Hibernate Assist Report: \"" + createHTMLReport.getAbsolutePath() + "\"";
-	                logger.info(informationMessage);
-	            } catch (FileNotFoundException ex) {
-	                Logger.getLogger(MySQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-	            } catch (UnsupportedEncodingException ex) {
-	                Logger.getLogger(MySQLAnalyser.class.getName()).log(Level.SEVERE, null, ex);
-	            }
-			}
-	 }
 }
