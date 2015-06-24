@@ -30,6 +30,7 @@ import org.hibernate.persister.entity.OuterJoinLoadable;
 import com.hibernateassist.basecode.CriteriaQueryValueTranslator;
 import com.hibernateassist.database.MSSQLAnalyser;
 import com.hibernateassist.database.MySQLAnalyser;
+import com.hibernateassist.database.OracleAnalyser;
 import com.hibernateassist.database.PostgreSQLAnalyser;
 
 
@@ -52,6 +53,7 @@ public class HibernateAssist {
     private String HTMLReportFolder;
     private String MSSQLExecutionPlanFile;
     private SessionFactory objSessionFactory;
+    private String strFilenamePrefix;
 
     public HibernateAssist(){
     	
@@ -64,7 +66,6 @@ public class HibernateAssist {
 
     /**
      * Retrieves Driver used for database {@link Connection}.
-     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
      * @throws SQLException in case of connection error
@@ -80,9 +81,8 @@ public class HibernateAssist {
     }
 
     /**
-     * Retrieves database connection URL with parameters
+     * Retrieves database connection URL with parameters<br/>
      * i.e jdbc:jtds:sqlserver://127.0.0.1:1433/javaQuery;sendStringParametersAsUnicode=false
-     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
      * @throws SQLException in case of connection error
@@ -100,7 +100,6 @@ public class HibernateAssist {
 
     /**
      * To get Hibernate dialect from current {@link Session}
-     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
      */
@@ -114,7 +113,6 @@ public class HibernateAssist {
 
     /**
      * Retrieves currently connected database name from {@link Session}
-     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
      * @throws SQLException in case of connection error
@@ -131,7 +129,6 @@ public class HibernateAssist {
 
     /**
      * Retrieves Username used for database {@link Connection}.
-     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
      * @throws {@link SQLException}
@@ -157,7 +154,6 @@ public class HibernateAssist {
 
     /**
      * Retrieves Password from hibernate.cfg.xml only if its configured
-     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error or property not found in hibernate.cfg.xml)
      * @throws NoSuchFieldException
@@ -170,7 +166,6 @@ public class HibernateAssist {
 
     /**
      * Retrieves Database version.
-     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
      * @throws {@link SQLException}
@@ -188,7 +183,6 @@ public class HibernateAssist {
     
     /**
      * Retrieves Database Product Name.
-     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error)
      * @throws {@link SQLException}
@@ -234,7 +228,6 @@ public class HibernateAssist {
 
     /**
      * Retrieve SQL Query from {@link Criteria}.
-     * <br/><br/>
      * @author vicky.thakor
      * @return {@link String} value or null(in case of connection error or Criteria error)
      * @throws NoSuchFieldException
@@ -257,7 +250,13 @@ public class HibernateAssist {
                     sessionImpl.getLoadQueryInfluencers());
             Field field = OuterJoinLoader.class.getDeclaredField("sql");
             field.setAccessible(true);
-            return (String) field.get(criteriaLoader);
+            String query = (String) field.get(criteriaLoader);
+            if("org.hibernate.dialect.OracleDialect".equalsIgnoreCase(getDialect())
+            		|| "org.hibernate.dialect.Oracle9Dialect".equalsIgnoreCase(getDialect())){
+            	if(criteriaImpl.getMaxResults() != null)
+            		query = "select * from (" + query + ") where rownum <= ?";
+            }
+            return query;
         }
         return null;
     }
@@ -265,7 +264,6 @@ public class HibernateAssist {
     /**
      * This method is cost a lot on database. Use this method to analyse your Criteria at developing environment.
      * Remove this method call at production server.
-     * <br/><br/>
      * @author vicky.thakor
      */
     public void analyseCriteria() {
@@ -285,8 +283,9 @@ public class HibernateAssist {
                     objMSSQLAnalyser.setDatabaseUsername(getDatabaseUsername());
                     objMSSQLAnalyser.setDatabasePassword(getDatabasePassword());
                     objMSSQLAnalyser.setHibernateSession(HibernateLocalSession);
-                    logger.info("Hibernate Assist: If report is not generating please execute same Criteria 2-3 times.");
-                    objMSSQLAnalyser.generateQueryReport(getCriteriaQuery(), getHTMLReportFolder());
+                    /* strFilenamePrefix allows users specify report name for identification. (i.e: UserLogin, Password change report, etc...) */
+                    strFilenamePrefix = strFilenamePrefix == null || strFilenamePrefix.isEmpty() ? "HibernateAssist_MSSQL" : strFilenamePrefix + "_HibernateAssist";
+                    objMSSQLAnalyser.generateQueryReport(getCriteriaQuery(), "", getHTMLReportFolder(), strFilenamePrefix);
                 }else if("org.hibernate.dialect.MySQLDialect".equalsIgnoreCase(dialect)
                 		|| "org.hibernate.dialect.MySQLInnoDBDialect".equalsIgnoreCase(dialect)
                 		|| "org.hibernate.dialect.MySQLMyISAMDialect".equalsIgnoreCase(dialect)){
@@ -300,7 +299,9 @@ public class HibernateAssist {
                 	
                 	String valuedQuery = getValuedCriteriaQuery();
         			if(valuedQuery != null && !valuedQuery.isEmpty()){
-        				objMySQLAnalyser.generateQueryReport(getCriteriaQuery(), valuedQuery, getHTMLReportFolder());
+        				/* strFilenamePrefix allows users specify report name for identification. (i.e: UserLogin, Password change report, etc...) */
+        				strFilenamePrefix = strFilenamePrefix == null || strFilenamePrefix.isEmpty() ? "HibernateAssist_MySQL" : strFilenamePrefix + "_HibernateAssist";
+        				objMySQLAnalyser.generateQueryReport(getCriteriaQuery(), valuedQuery, getHTMLReportFolder(), strFilenamePrefix);
         			}
                 }else if("org.hibernate.dialect.PostgreSQLDialect".equalsIgnoreCase(dialect)){
                 	PostgreSQLAnalyser objPostgreSQLAnalyser = new PostgreSQLAnalyser();
@@ -308,7 +309,20 @@ public class HibernateAssist {
                 	
                 	String valuedQuery = getValuedCriteriaQuery();
         			if(valuedQuery != null && !valuedQuery.isEmpty()){
-        				objPostgreSQLAnalyser.generateQueryReport(getCriteriaQuery(), valuedQuery, getHTMLReportFolder());
+        				/* strFilenamePrefix allows users specify report name for identification. (i.e: UserLogin, Password change report, etc...) */
+        				strFilenamePrefix = strFilenamePrefix == null || strFilenamePrefix.isEmpty() ? "HibernateAssist_PostgreSQL" : strFilenamePrefix+ "_HibernateAssist";
+        				objPostgreSQLAnalyser.generateQueryReport(getCriteriaQuery(), valuedQuery, getHTMLReportFolder(), strFilenamePrefix);
+        			}
+                }else if("org.hibernate.dialect.OracleDialect".equalsIgnoreCase(dialect)
+            			|| "org.hibernate.dialect.Oracle9Dialect".equalsIgnoreCase(dialect)){
+                	OracleAnalyser objOracleAnalyser = new OracleAnalyser();
+                	objOracleAnalyser.setHibernateSession(HibernateLocalSession);
+                	
+                	String valuedQuery = getValuedCriteriaQuery();
+        			if(valuedQuery != null && !valuedQuery.isEmpty()){
+        				/* strFilenamePrefix allows users specify report name for identification. (i.e: UserLogin, Password change report, etc...) */
+        				strFilenamePrefix = strFilenamePrefix == null || strFilenamePrefix.isEmpty() ? "HibernateAssist_Oracle" : strFilenamePrefix + "_HibernateAssist";
+        				objOracleAnalyser.generateQueryReport(getCriteriaQuery(), valuedQuery, getHTMLReportFolder(), strFilenamePrefix);
         			}
                 }
             }
@@ -319,7 +333,6 @@ public class HibernateAssist {
 
     /**
      * Create HTML Report from Microsoft SQLPlan.
-     * <br/><br/>
      * @author vicky.thakor
      * @throws IOException 
      */
@@ -353,14 +366,15 @@ public class HibernateAssist {
     	    }
     		
     		MSSQLAnalyser objMSSQLAnalyser = new MSSQLAnalyser();
-    		objMSSQLAnalyser.generateQueryReportFromFile(temporaryXMLFile.getAbsolutePath(), getHTMLReportFolder());
+    		/* strFilenamePrefix allows users specify report name for identification. (i.e: UserLogin, Password change report, etc...) */
+            strFilenamePrefix = strFilenamePrefix == null || strFilenamePrefix.isEmpty() ? "HibernateAssist_MSSQL" : strFilenamePrefix + "_HibernateAssist";
+    		objMSSQLAnalyser.generateQueryReportFromFile(temporaryXMLFile.getAbsolutePath(), getHTMLReportFolder(), strFilenamePrefix);
     	}
     }
     
     /**
      * Get {@link Criteria} query with values.
-     * <br/><br/>
-     * @author 0Signals
+     * @author vicky.thakor
      * @return {@link String}
      */
     public String getValuedCriteriaQuery(){
@@ -375,12 +389,14 @@ public class HibernateAssist {
      * Get criteria
      * @return {@link Criteria}
      */
-    public Criteria getCriteria() {
+    private Criteria getCriteria() {
         return criteria;
     }
 
     /**
      * Set criteria to profile.
+     * @author vicky.thakor
+     * @since 1.0
      * @param criteria 
      */
     public void setCriteria(Criteria criteria) {
@@ -396,7 +412,10 @@ public class HibernateAssist {
     }
 
     /**
-     * Set HTML Report Folder
+     * Set report folder and filename will be auto generated.
+     * @author vicky.thakor
+     * @since 1.0
+     * @see HibernateAssist#setHTMLReportFolder(String HTMLReportFolder, String strFilenamePrefix)
      * @param HTMLReportFolder
      */
     public void setHTMLReportFolder(String HTMLReportFolder) {
@@ -404,23 +423,34 @@ public class HibernateAssist {
     }
 
     /**
+     * Set report folder path and filename prefix to identify the report.
+     * @author vicky.thakor
+     * @date 23rd June, 2015
+     * @since 1.3
+     * @param HTMLReportFolder
+     * @param strFilenamePrefix
+     */
+    public void setHTMLReportFolder(String HTMLReportFolder, String strFilenamePrefix) {
+        this.HTMLReportFolder = HTMLReportFolder;
+        this.strFilenamePrefix = strFilenamePrefix;
+    }
+    
+    /**
      * Get .sqlplan file path
      * @return
      */
-	public String getMSSQLExecutionPlanFile() {
+	private String getMSSQLExecutionPlanFile() {
 		return MSSQLExecutionPlanFile;
 	}
 
 	/**
-	 * Set .sqlplan file path
+	 * Set .sqlplan file path to analyse.
+	 * @author vicky.thakor
+	 * @since 1.0
 	 * @param mSSQLExecutionPlanFile
 	 */
 	public void setMSSQLExecutionPlanFile(String mSSQLExecutionPlanFile) {
 		MSSQLExecutionPlanFile = mSSQLExecutionPlanFile;
-	}
-
-	public SessionFactory getObjSessionFactory() {
-		return objSessionFactory;
 	}
 
 	public void setObjSessionFactory(SessionFactory objSessionFactory) {
