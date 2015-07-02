@@ -58,6 +58,8 @@ public class MSSQLAnalyser extends AbstractDAO implements Analyser{
 	public void generateQueryReport(String hibernateQuery, String actualQuery, String reportFolderPath, String strFilenamePrefix) throws Exception{
 		List<MSSQLQueryDetails> listMssqlQueryDetails = getExecutionPlan(hibernateQuery);
 		if(listMssqlQueryDetails != null && !listMssqlQueryDetails.isEmpty()){
+			/* In case multiple execution found on database append count value */
+			int executionPlanCount = 0;
 			for (MSSQLQueryDetails mssqlQueryDetails : listMssqlQueryDetails) {
 				if(mssqlQueryDetails.getQueryPlan() != null && !mssqlQueryDetails.getQueryPlan().isEmpty()){
 
@@ -68,7 +70,11 @@ public class MSSQLAnalyser extends AbstractDAO implements Analyser{
 					stringBuilderHTMLReport.append(CommonUtil.getHTMLReportFooter());
 					
 					reportFolderPath = reportFolderPath == null ? "" : reportFolderPath;
+					/* In case multiple execution found on database append count value */
+					strFilenamePrefix = executionPlanCount > 0 ? strFilenamePrefix + "_" + executionPlanCount : strFilenamePrefix;
+					
 					new CommonUtil().createHTMLReportFile(stringBuilderHTMLReport.toString(), strFilenamePrefix, reportFolderPath);
+					executionPlanCount++;
 				}
 			}
 		}else{
@@ -529,9 +535,47 @@ public class MSSQLAnalyser extends AbstractDAO implements Analyser{
         
         if ("Sort".equalsIgnoreCase(operationType)) {
             if (elementRelOp.getElementsByTagName("Sort") != null) {
+            	/*Element elementSort = (Element) elementRelOp.getElementsByTagName("Sort");
+            	
+            	if(elementSort.hasChildNodes()){
+            		for (int i = 0; i < elementSort.getChildNodes().getLength(); i++) {
+            			Element elementChildNode = (Element) elementSort.getChildNodes().item(i);
+    					if("OrderBy".equalsIgnoreCase(elementChildNode.getNodeName())){
+    						Element elementOrderByColumn = (Element) elementChildNode.getElementsByTagName("OrderByColumn").item(0);
+    						NamedNodeMap namedNodeMap = elementOrderByColumn.getAttributes();
+    						getAttributeMap(namedNodeMap, mapOperationProperty);
+    						
+    						Element elementColumnReference = (Element) elementOrderByColumn.getElementsByTagName("ColumnReference").item(0);
+    						namedNodeMap = elementColumnReference.getAttributes();
+    						getAttributeMap(namedNodeMap, mapOperationProperty);
+    					}
+					}
+            	}*/
+            	
                 Node sortNode = elementRelOp.getElementsByTagName("Sort").item(0);
-                if (sortNode.hasChildNodes() && sortNode.getChildNodes().item(1) != null && "OrderBy".equalsIgnoreCase(sortNode.getChildNodes().item(1).getNodeName())) {
-                    Node OrderByNode = sortNode.getChildNodes().item(1);
+                if (sortNode.hasChildNodes()) {
+                	for (int i = 0; i < sortNode.getChildNodes().getLength(); i++) {
+						if("OrderBy".equalsIgnoreCase(sortNode.getChildNodes().item(i).getNodeName())){
+							Node OrderByNode = sortNode.getChildNodes().item(0);
+							Node OrderByColumnNode = OrderByNode.getChildNodes().item(0);
+							if (OrderByColumnNode.getAttributes() != null
+	                                && OrderByColumnNode.getAttributes().getNamedItem("Ascending") != null
+	                                && OrderByColumnNode.getAttributes().getNamedItem("Ascending").getNodeValue() != null
+	                                && !OrderByColumnNode.getAttributes().getNamedItem("Ascending").getNodeValue().isEmpty()) {
+	                            mapOperationProperty.put("Ascending", OrderByColumnNode.getAttributes().getNamedItem("Ascending").getNodeValue());
+	                        }
+							
+							 if ("ColumnReference".equalsIgnoreCase(OrderByColumnNode.getChildNodes().item(0).getNodeName())) {
+	                            Node ColumnReferenceNode = OrderByColumnNode.getChildNodes().item(0);
+	                            NamedNodeMap namedNodeMap = ColumnReferenceNode.getAttributes();
+	                            getAttributeMap(namedNodeMap, mapOperationProperty);
+	                        }
+							
+							break;
+						}
+					}
+                	
+                    /*Node OrderByNode = sortNode.getChildNodes().item(1);
                     if (OrderByNode.getChildNodes().item(1) != null && "OrderByColumn".equalsIgnoreCase(OrderByNode.getChildNodes().item(1).getNodeName())) {
                         Node OrderByColumnNode = OrderByNode.getChildNodes().item(1);
                         if (OrderByColumnNode.getAttributes() != null
@@ -546,7 +590,7 @@ public class MSSQLAnalyser extends AbstractDAO implements Analyser{
                             NamedNodeMap namedNodeMap = ColumnReferenceNode.getAttributes();
                             getAttributeMap(namedNodeMap, mapOperationProperty);
                         }
-                    }
+                    }*/
                 }
 
             }
@@ -656,9 +700,19 @@ public class MSSQLAnalyser extends AbstractDAO implements Analyser{
     			getAttributeMap(namedNodeMapIndex, mapOperationProperty);
         		
         		if(elementIndexScan.hasChildNodes()){
-        			Element elementObject = (Element) elementIndexScan.getElementsByTagName("Object").item(0);
-        			NamedNodeMap namedNodeMap = elementObject.getAttributes();
-        			getAttributeMap(namedNodeMap, mapOperationProperty);
+        			for(int i = 0; i < elementIndexScan.getChildNodes().getLength(); i++){
+        				if(elementIndexScan.getChildNodes().item(i).getNodeType() == Node.ELEMENT_NODE){
+        					Element elementChildNode = (Element) elementIndexScan.getChildNodes().item(i);
+        					if("Object".equalsIgnoreCase(elementChildNode.getNodeName())){
+        						NamedNodeMap namedNodeMap = elementChildNode.getAttributes();
+        						getAttributeMap(namedNodeMap, mapOperationProperty);
+        					}else if("Predicate".equalsIgnoreCase(elementChildNode.getNodeName())){
+        						Element elementScalarOperator = (Element) elementChildNode.getElementsByTagName("ScalarOperator").item(0);
+                				NamedNodeMap namedNodeMap = elementScalarOperator.getAttributes();
+                				getAttributeMap(namedNodeMap, mapOperationProperty);
+        					}
+        				}
+        			}    
         		}
         	}
         }else if("Hash Match".equalsIgnoreCase(operationType)){
