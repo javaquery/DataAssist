@@ -48,6 +48,7 @@ Hibernate is one of the greatest creation but now developer don't care about que
 No configuration required to use Hibernate Assist
 
 #Online Sample Report
+<a href="http://javaquery.github.io/HibernateAssist/" target="_blank">Hibernate Assist</a><br/>
 Microsoft SQL Server: <a href="http://javaquery.github.io/HibernateAssist/mssql" target="_blank">http://javaquery.github.io/HibernateAssist/mssql</a><br/>
 MySQL: <a href="http://javaquery.github.io/HibernateAssist/mysql" target="_blank">http://javaquery.github.io/HibernateAssist/mysql</a><br/>
 Oracle: <a href="http://javaquery.github.io/HibernateAssist/oracle" target="_blank">http://javaquery.github.io/HibernateAssist/oracle</a><br/>
