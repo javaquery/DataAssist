@@ -39,8 +39,8 @@ Hibernate is one of the greatest creation but now developer don't care about que
 		<td>✔ MySQL (5.6 or above)</td>
 	</tr>
 	<tr>
-		<td>✔ PostgreSQL Developed(Available in next release)</td>
-		<td>✔ Oracle(Under Development)</td>
+		<td>✔ PostgreSQL</td>
+		<td>✔ Oracle</td>
 	</tr>
 </table>
 
@@ -48,8 +48,10 @@ Hibernate is one of the greatest creation but now developer don't care about que
 No configuration required to use Hibernate Assist
 
 #Online Sample Report
-Microsoft SQL Server: <a href="http://javaquery.github.io/HibernateAssist/" target="_blank">http://javaquery.github.io/HibernateAssist/</a><br/>
-MySQL: <a href="http://javaquery.github.io/HibernateAssist/mysql" target="_blank">http://javaquery.github.io/HibernateAssist/mysql</a>
+Microsoft SQL Server: <a href="http://javaquery.github.io/HibernateAssist/mssql" target="_blank">http://javaquery.github.io/HibernateAssist/mssql</a><br/>
+MySQL: <a href="http://javaquery.github.io/HibernateAssist/mysql" target="_blank">http://javaquery.github.io/HibernateAssist/mysql</a><br/>
+Oracle: <a href="http://javaquery.github.io/HibernateAssist/oracle" target="_blank">http://javaquery.github.io/HibernateAssist/oracle</a><br/>
+PostgreSQL: <a href="http://javaquery.github.io/HibernateAssist/postgresql" target="_blank">http://javaquery.github.io/HibernateAssist/postgresql</a><br/>
 
 #Source Code (Criteria Analysis)
 <pre>
